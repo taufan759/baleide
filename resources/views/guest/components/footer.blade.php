@@ -68,7 +68,7 @@
                         <ul class="list-area">
                             @foreach($categories->take(4) as $cat)
                             <li>
-                                <a href="{{ url('kategori/' . $cat->slug) }}">
+                                <a href="{{ url('category/' . $cat->slug) }}">
                                     <i class="fa-solid fa-chevrons-right"></i>
                                     {{ $cat->name }}
                                 </a>
