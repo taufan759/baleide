@@ -22,7 +22,7 @@
 @section('content')
     <div class="breadcrumb-wrapper">
         <div class="book1">
-            <img src="{{ asset('client/assets/img/hero/book1.png') }}" alt="book">
+            <img src="https://baleide.id/wp-content/uploads/2025/05/Vector-orange1.png" alt="book">
         </div>
         <div class="book2">
             <img src="{{ asset('client/assets/img/hero/book2.png') }}" alt="book">
