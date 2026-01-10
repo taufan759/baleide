@@ -4,26 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
-        Schema::create('photo_product', function (Blueprint $table) {
+        Schema::create('ebook_photos', function (Blueprint $table) {
             $table->id();
-            $table->string('foto');
-            $table->unsignedBigInteger('id_product');
+            $table->foreignId('ebook_id')->constrained('ebooks')->cascadeOnDelete();
+            $table->string('photo');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('photo_product');
+        Schema::dropIfExists('ebook_photos');
     }
 };

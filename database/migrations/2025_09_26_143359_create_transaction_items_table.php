@@ -10,10 +10,11 @@ return new class extends Migration {
         Schema::create('transaction_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained('transactions')->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
-            $table->integer('qty');
-            $table->string('price');
-            $table->string('subtotal');
+            $table->foreignId('ebook_id')->constrained('ebooks')->cascadeOnDelete();
+            $table->integer('qty')->default(1);
+            $table->decimal('price', 15, 2);
+            $table->decimal('subtotal', 15, 2);
+            $table->timestamps();
         });
     }
 

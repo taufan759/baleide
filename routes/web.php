@@ -5,17 +5,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuestController;
 
 # Admin Controllers
+use App\Http\Controllers\User\MyBookController;
+use App\Http\Controllers\User\ProfileController;
+use App\Http\Controllers\User\TransactionController;
+use App\Http\Controllers\User\DashboardController as DashboardUser;
 use App\Http\Controllers\Admin\DashboardController as DashboardAdmin;
 use App\Http\Controllers\Admin\ManageMaster\UserController as UserAdmin;
-use App\Http\Controllers\Admin\ManageMaster\CategoryController as CategoryAdmin;
-use App\Http\Controllers\Admin\ManageMaster\ProductController as ProductAdmin;
-use App\Http\Controllers\Admin\ManageMaster\VoucherController as VoucherAdmin;
-use App\Http\Controllers\Admin\TransactionController as TransactionAdmin;
 # Sales Controllers
-use App\Http\Controllers\Sales\DashboardController as DashboardSales;
-use App\Http\Controllers\Sales\ManageMaster\CategoryController as CategorySales;
-use App\Http\Controllers\Sales\ManageMaster\ProductController as ProductSales;
-use App\Http\Controllers\Sales\TransactionController as TransactionSales;
+use App\Http\Controllers\Admin\TransactionController as TransactionAdmin;
+use App\Http\Controllers\Admin\ManageMaster\EbookController as EbookAdmin;
+use App\Http\Controllers\Admin\ManageMaster\VoucherController as VoucherAdmin;
+use App\Http\Controllers\Admin\ManageMaster\CategoryController as CategoryAdmin;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,19 +24,31 @@ use App\Http\Controllers\Sales\TransactionController as TransactionSales;
 */
 
 # -------------------- AUTH --------------------
-Route::get('/login', [AuthController::class, 'index'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'index'])->name('login');
+    Route::get('/register', [AuthController::class, 'registerView'])->name('register');
+    
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,60');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 # -------------------- Guest --------------------
 Route::get('/', [GuestController::class, 'home'])->name('home');
+Route::get('/ebook', [GuestController::class, 'allBooks'])->name('allBooks');
+Route::get('/ebook/{slug}', [GuestController::class, 'showEbook'])->name('ebook.show');
+Route::get('/category/{slug}', [GuestController::class, 'showCategory'])->name('category.show');
 Route::get('/cart', [GuestController::class, 'showCart'])->name('cart.show');
 Route::post('/cart/fetch', [GuestController::class, 'fetchCart'])->name('cart.fetch');
-Route::get('/product/{slug}', [GuestController::class, 'showProduct'])->name('product.show');
 Route::post('/checkout', [GuestController::class, 'checkout'])->name('checkout');
-Route::post('/midtrans/callback', [GuestController::class, 'callback'])->name('midtrans.callback');
+Route::get('/checkout/{slug}', [GuestController::class, 'buyNow'])->name('checkout.buyNow')->middleware('auth');
+Route::post('/midtrans/callback', [GuestController::class, 'callback'])->name('midtrans.callback')->middleware('auth');
 Route::get('/checkout-success', [GuestController::class, 'success'])->name('checkout.success');
-Route::post('/voucher', [GuestController::class, 'voucher'])->name('checkout.voucher');
+Route::get('/contact', [GuestController::class, 'contact'])->name('contact');
+Route::post('/contact', [GuestController::class, 'contactSend'])->name('contact.send');
 
 # -------------------- ADMIN --------------------
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
@@ -69,13 +81,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
             Route::post('update', [VoucherAdmin::class, 'update']);
             Route::delete('/', [VoucherAdmin::class, 'delete']);
         });
-        Route::prefix('products')->group(function () {
-            Route::get('/', [ProductAdmin::class, 'index']);
-            Route::post('/', [ProductAdmin::class, 'create']);
-            Route::get('all', [ProductAdmin::class, 'getall']);
-            Route::post('get', [ProductAdmin::class, 'get']);
-            Route::post('update', [ProductAdmin::class, 'update']);
-            Route::delete('/', [ProductAdmin::class, 'delete']);
+        Route::prefix('ebook')->group(function () {
+            Route::get('/', [EbookAdmin::class, 'index']);
+            Route::post('/', [EbookAdmin::class, 'create']);
+            Route::get('all', [EbookAdmin::class, 'getall']);
+            Route::post('get', [EbookAdmin::class, 'get']);
+            Route::post('update', [EbookAdmin::class, 'update']);
+            Route::delete('/', [EbookAdmin::class, 'delete']);
         });
     });
 
@@ -87,35 +99,29 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     });
 });
 
-# -------------------- SALES --------------------
-Route::prefix('sales')->middleware(['auth', 'role:sales'])->group(function () {
-    # Dashboard
-    Route::get('/', [DashboardSales::class, 'index']);
+# -------------------- USER DASHBOARD --------------------
+Route::prefix('dashboard')->middleware(['auth', 'role:user'])->group(function () {
+    
+    # Menu Dashboard
+    Route::get('/', [DashboardUser::class, 'index']);
 
-    # Manage Data Member
-    Route::prefix('manage-master')->group(function () {
-        Route::prefix('categories')->group(function () {
-            Route::get('/', [CategorySales::class, 'index']);
-            Route::post('/', [CategorySales::class, 'create']);
-            Route::get('all', [CategorySales::class, 'getall']);
-            Route::post('get', [CategorySales::class, 'get']);
-            Route::post('update', [CategorySales::class, 'update']);
-            Route::delete('/', [CategorySales::class, 'delete']);
-        });
-        Route::prefix('products')->group(function () {
-            Route::get('/', [ProductSales::class, 'index']);
-            Route::post('/', [ProductSales::class, 'create']);
-            Route::get('all', [ProductSales::class, 'getall']);
-            Route::post('get', [ProductSales::class, 'get']);
-            Route::post('update', [ProductSales::class, 'update']);
-            Route::delete('/', [ProductSales::class, 'delete']);
-        });
+    # Menu Buku Saya (My Books)
+    Route::prefix('my-books')->group(function () {
+        Route::get('/', [MyBookController::class, 'index']);
+        Route::get('/{slug}', [MyBookController::class, 'show']);
     });
 
+    # Menu Riwayat Pesanan (Transactions)
     Route::prefix('transactions')->group(function () {
-        Route::get('/', [TransactionSales::class, 'index']);
-        Route::get('all', [TransactionSales::class, 'getall']);
-        Route::get('print', [TransactionSales::class, 'print']);
-        Route::get('show/{id}', [TransactionSales::class, 'show']);
+        Route::get('/', [TransactionController::class, 'index']);
+        Route::get('/{id}', [TransactionController::class, 'show']);
     });
+
+    # Menu Profil Saya
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'index']);
+        Route::put('/update', [ProfileController::class, 'update']);
+        Route::put('/password', [ProfileController::class, 'updatePassword']);
+    });
+
 });

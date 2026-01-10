@@ -2,196 +2,258 @@
 
 @section('title', 'Beranda')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+@endpush
+
 @section('content')
-    <div class="relative">
-
-        <main class="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
-            @include('guest.components.header')
-
-            <section aria-labelledby="products-heading" class="pt-6 pb-24">
-                <h2 id="products-heading" class="sr-only">Produk</h2>
-                <div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4 lg:items-start">
-                    @include('guest.components.sidebar_categories')
-
-                    <div class="lg:col-span-3">
-                        @if ($errors->any())
-                            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 flex items-start gap-3" role="alert">
-                                <i class="fa-solid fa-circle-exclamation text-red-500 text-xl mt-0.5"></i>
-                                <div>
-                                    <span class="font-semibold">Terjadi Kesalahan!</span>
-                                    <p class="text-gray-700 mt-1">Mohon periksa kembali data yang Anda masukkan:</p>
-                                    <ul class="list-disc list-inside mt-2 text-gray-700">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($products->count() > 0)
-                        <div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                            @foreach($products as $product)
-                            @php
-                                $discountPercent = 0;
-                                $discountInfo = null;
-                                $hasDiscount = false;
-
-                                if ($product->price_real && $product->price_real > $product->price) {
-                                    $discountPercent = round((($product->price_real - $product->price) / $product->price_real) * 100);
-                                    $hasDiscount = $discountPercent > 0;
-
-                                    if ($hasDiscount) {
-                                        $vouchers = $product->vouchers;
-                                        $activeVoucher = $vouchers->firstWhere('status', 'ACTIVE');
-                                        if ($activeVoucher) {
-                                            $discountInfo = $activeVoucher->name;
-                                        }
-                                    }
-                                }
-                            @endphp
-                            <div class="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                @forelse ($product->photos->take(1) as $item)
-                                    <a href="{{ route('product.show', $product->slug) }}" class="aspect-h-4 aspect-w-3 bg-gray-200 sm:aspect-none sm:h-80">
-                                        <img src="{{ $item->foto }}" alt="{{ $product->name }}" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105 sm:h-full sm:w-full" />
-                                    </a>
-                                @empty
-                                    <a href="{{ route('product.show', $product->slug) }}" class="aspect-h-4 aspect-w-3 bg-gray-200 sm:aspect-none sm:h-80">
-                                        <img src="{{ asset('assets/img/human.png') }}" alt="{{ $product->name }}" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105 sm:h-full sm:w-full" />
-                                    </a>
-                                @endforelse
-                                <div class="flex flex-1 flex-col space-y-2 p-4">
-                                    <div class="flex-1">
-                                        <h3 class="text-sm font-medium text-gray-900">
-                                            <a href="{{ route('product.show', $product->slug) }}">
-                                               {{ $product->category->name }} {{ $product->name }}
-                                            </a>
-                                        </h3>
-                                        <p class="mt-1 text-xs text-gray-500">
-                                            <span class="inline-block bg-indigo-100 text-indigo-800 rounded-full px-2 py-0.5 font-semibold">
-                                                {{ $product->category->name }}
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="text-left">
-                                            @if($hasDiscount)
-                                                <p class="text-xs text-gray-500 line-through mb-1">
-                                                    Rp. {{ number_format($product->price_real,0,',','.') }}
-                                                </p>
-                                                <p class="text-xl font-bold text-gray-900 mb-1">
-                                                    Rp. {{ number_format($product->price,0,',','.') }}
-                                                </p>
-                                                <span class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded-full mb-1">
-                                                    {{ $discountPercent }}% OFF
-                                                </span>
-                                            @else
-                                                <p class="text-xl font-bold text-gray-900">
-                                                    Rp. {{ number_format($product->price,0,',','.') }}
-                                                </p>
-                                            @endif
-                                        </div>
-                                        <button type="button"
-                                            class="rounded-full  transition add-to-cart"
-                                            data-id="{{ $product->id }}">
-                                            <i class="fa-solid fa-cart-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
+    <div class="hero-section hero-1 fix">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-xl-8 col-lg-6">
+                    <div class="hero-items">
+                        <div class="book-shape">
+                            <img src="https://baleide.id/wp-content/uploads/2025/05/Vector-orange1.png" alt="shape-img">
                         </div>
-                        @else
-                        <div class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-white/80 py-24 text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                            </svg>
-                            <h3 class="mt-2 text-xl font-semibold text-gray-900">Produk tidak ditemukan</h3>
-                            <p class="mt-1 text-sm text-gray-500">Kami tidak dapat menemukan produk yang cocok dengan pencarian atau filter Anda.</p>
-                            <div class="mt-6">
-                                <a href="{{ route('home') }}" class="inline-flex items-center rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                    Hapus semua filter
+                        <div class="frame-shape1 float-bob-x">
+                            <img src="{{ asset('client/assets/img/hero/frame.png')}}" alt="shape-img">
+                        </div>
+                        <div class="frame-shape2 float-bob-y">
+                            <img src="{{ asset('client/assets/img/hero/frame-2.png')}}" alt="shape-img">
+                        </div>
+                        <div class="frame-shape3">
+                            <img src="{{ asset('client/assets/img/hero/xstar.png')}}" alt="img">
+                        </div>
+                        <div class="frame-shape4 float-bob-x">
+                            <img src="{{ asset('client/assets/img/hero/frame-shape.png')}}" alt="img">
+                        </div>
+                        <div class="bg-shape1">
+                            <img src="{{ asset('client/assets/img/hero/bg-shape.png')}}" alt="img">
+                        </div>
+                        <div class="bg-shape2">
+                            <img src="{{ asset('client/assets/img/hero/bg-shape2.png')}}" alt="shape-img">
+                        </div>
+                        <div class="hero-content">
+                            <h6 class="wow fadeInUp" data-wow-delay=".3s">Baleide</h6>
+                            <h1 class="wow fadeInUp" data-wow-delay=".5s">Platform Belajar Online <br> Untuk Skill Nyata</h1>
+                            <div class="form-clt wow fadeInUp" data-wow-delay=".9s">
+                                <a href="/book" class="theme-btn">
+                                    Baca Buku Sekarang <i class="fa-solid fa-arrow-right-long"></i>
                                 </a>
                             </div>
                         </div>
-                        @endif
-
-                        <div class="mt-10 ml-auto text-center flex justify-center">
-                            @if ($products->hasPages())
-                                <nav aria-label="Pagination" class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
-                                        <!-- Previous Button -->
-                                        <a href="{{ $products->previousPageUrl() }}" 
-                                        class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 {{ $products->onFirstPage() ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50' }}"
-                                        {{ $products->onFirstPage() ? 'aria-disabled="true"' : '' }}>
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                            </svg>
-                                        </a>
-
-                                        <div class="flex space-x-1">
-                                            @php
-                                                $currentPage = $products->currentPage();
-                                                $lastPage = $products->lastPage();
-                                                $range = 2; 
-                                                $start = max(1, $currentPage - $range);
-                                                $end = min($lastPage, $currentPage + $range);
-                                            @endphp
-
-                                            <!-- First Page -->
-                                            @if ($start > 1)
-                                                <a href="{{ $products->url(1) }}"
-                                                class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
-                                                aria-current="{{ $products->currentPage() == 1 ? 'page' : '' }}">
-                                                    1
-                                                </a>
-                                                @if ($start > 2)
-                                                    <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">...</span>
-                                                @endif
-                                            @endif
-
-                                            <!-- Page Range -->
-                                            @for ($page = $start; $page <= $end; $page++)
-                                                <a href="{{ $products->url($page) }}"
-                                                class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium {{ $products->currentPage() == $page ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
-                                                aria-current="{{ $products->currentPage() == $page ? 'page' : '' }}">
-                                                    {{ $page }}
-                                                </a>
-                                            @endfor
-
-                                            <!-- Last Page -->
-                                            @if ($end < $lastPage)
-                                                @if ($end < $lastPage - 1)
-                                                    <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">...</span>
-                                                @endif
-                                                <a href="{{ $products->url($lastPage) }}"
-                                                class="inline-flex items-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
-                                                aria-current="{{ $products->currentPage() == $lastPage ? 'page' : '' }}">
-                                                    {{ $lastPage }}
-                                                </a>
-                                            @endif
-                                        </div>
-
-                                        <!-- Next Button -->
-                                        <a href="{{ $products->nextPageUrl() }}"
-                                        class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 {{ $products->hasMorePages() ? 'hover:bg-gray-50' : 'cursor-not-allowed opacity-50' }}"
-                                        {{ $products->hasMorePages() ? '' : 'aria-disabled="true"' }}>
-                                            <svg class=" h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                            </svg>
-                                        </a>
-                                    </div>
-                                </nav>
-                            @endif
-                        </div>
                     </div>
                 </div>
-            </section>
-        </main>
+                <div class="col-12 col-xl-4 col-lg-6">
+                    <div class="girl-image">
+                        <img class=" float-bob-x" src="https://baleide.id/wp-content/uploads/2025/05/image-herosection.png" alt="img">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <section class="feature-section fix section-padding">
+        <div class="container">
+            <div class="feature-wrapper">
+                <div class="feature-box-items wow fadeInUp" data-wow-delay=".2s">
+                    <div class="icon"><i class="fas fa-file-download"></i></div>
+                    <div class="content">
+                        <h3>Akses Instan</h3>
+                        <p>Langsung baca setelah bayar</p>
+                    </div>
+                </div>
+                <div class="feature-box-items wow fadeInUp" data-wow-delay=".4s">
+                    <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="content">
+                        <h3>Pembayaran Aman</h3>
+                        <p>Terverifikasi oleh Midtrans</p>
+                    </div>
+                </div>
+                <div class="feature-box-items wow fadeInUp" data-wow-delay=".6s">
+                    <div class="icon"><i class="fas fa-book-reader"></i></div>
+                    <div class="content">
+                        <h3>Kualitas Terbaik</h3>
+                        <p>E-book PDF jernih & asli</p>
+                    </div>
+                </div>
+                <div class="feature-box-items wow fadeInUp" data-wow-delay=".8s">
+                    <div class="icon"><i class="fas fa-tags"></i></div>
+                    <div class="content">
+                        <h3>Harga Spesial</h3>
+                        <p>Promo menarik setiap hari</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-section section-padding fix pt-0">
+        <div class="container">
+            <div class="section-title-area">
+                <div class="section-title">
+                    <h2 class="wow fadeInUp" data-wow-delay=".3s">Buku Populer</h2>
+                </div>
+                <a href="{{ url('ebook') }}" class="theme-btn transparent-btn wow fadeInUp" data-wow-delay=".5s">
+                    Lihat Semua <i class="fa-solid fa-arrow-right-long"></i>
+                </a>
+            </div>
+            <div class="swiper book-slider">
+                <div class="swiper-wrapper">
+                    @foreach($popularBooks as $book)
+                    <div class="swiper-slide">
+                        <div class="shop-box-items style-2">
+                            <div class="book-thumb center">
+                                @php
+                                    $cover = $book->photos->first();
+                                    $imgUrl = $cover ? asset($cover->photo) : asset('assets/img/default-ebook.png');
+                                @endphp
+                                <a href="{{ url('ebook/' . $book->slug) }}">
+                                    <img src="{{ $imgUrl }}" alt="{{ $book->title }}">
+                                </a>
+                                <ul class="shop-icon d-grid justify-content-center align-items-center">
+                                    <li><a href="{{ url('ebook/' . $book->slug) }}"><i class="far fa-eye"></i></a></li>
+                                    <li>
+                                        <a href="javascript:void(0)" onclick="addToCart('{{ $book->id }}', '{{ $book->title }}')">
+                                            <i class="fa-solid fa-basket-shopping"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="shop-content">
+                                <h5>{{ $book->category->name }}</h5>
+                                <h3><a href="{{ url('ebook/' . $book->slug) }}">{{ Str::limit($book->title, 40) }}</a></h3>
+                                <ul class="price-list">
+                                    <li>Rp {{ number_format($book->price, 0, ',', '.') }}</li>
+                                </ul>
+                                <ul class="author-post">
+                                    <li class="authot-list">
+                                        <span class="icon"><i class="fa-regular fa-file-pdf text-danger"></i></span>
+                                        <span class="content ml-2">Format: {{ strtoupper($book->file_format) }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="shop-button">
+                                <a href="{{ url('checkout/' . $book->slug) }}" class="theme-btn">
+                                    Beli Cepat
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="book-catagories-section fix section-padding">
+        <div class="container">
+            <div class="book-catagories-wrapper">
+                <div class="section-title text-center">
+                    <h2 class="wow fadeInUp" data-wow-delay=".3s">Top Categories Book</h2>
+                </div>
+                <div class="array-button">
+                    <button class="array-prev"><i class="fal fa-arrow-left"></i></button>
+                    <button class="array-next"><i class="fal fa-arrow-right"></i></button>
+                </div>
+                <div class="swiper book-catagories-slider">
+                    <div class="swiper-wrapper">
+                        @foreach($topBooks as $index => $book)
+                            <div class="swiper-slide">
+                                <div class="book-catagories-items">
+                                    <div class="book-thumb">
+                                        @php
+                                            $cover = $book->photos->first();
+                                            $imgUrl = $cover ? asset($cover->photo) : asset('assets/img/default-ebook.png');
+                                        @endphp
+                                        <img src="{{ $imgUrl }}" alt="{{ $book->title }}" width="100" class="rounded">
+                                        <div class="circle-shape">
+                                            <img src="{{ asset('client/assets/img/book-categori/circle-shape.png')}}" alt="shape-img">
+                                        </div>
+                                    </div>
+                                    <div class="number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</div>
+                                    <h3>
+                                        <a href="{{ url('ebook/' . $book->slug) }}">{{ Str::limit($book->title, 25) }}</a>
+                                    </h3>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="top-ratting-book-section fix section-padding section-bg">
+        <div class="container">
+            <div class="top-ratting-book-wrapper">
+                <div class="section-title-area">
+                    <div class="section-title">
+                        <h2 class="wow fadeInUp" data-wow-delay=".3s">Buku Baru Dirilis</h2>
+                    </div>
+                    <a href="{{ url('ebook') }}" class="theme-btn transparent-btn wow fadeInUp" data-wow-delay=".5s">
+                        Lihat Semua <i class="fa-solid fa-arrow-right-long"></i>
+                    </a>
+                </div>
+                <div class="row">
+                    @foreach($latestBooks as $book)
+                    <div class="col-xl-6 wow fadeInUp" data-wow-delay=".3s">
+                        <div class="top-ratting-box-items">
+                            <div class="book-thumb">
+                                @php
+                                    $cover = $book->photos->first();
+                                    $imgUrl = $cover ? asset($cover->photo) : asset('assets/img/default-ebook.png');
+                                @endphp
+                                <a href="{{ url('ebook/' . $book->slug) }}">
+                                    <img src="{{ $imgUrl }}" alt="{{ $book->title }}">
+                                </a>
+                            </div>
+                            <div class="book-content">
+                                <div class="title-header">
+                                    <div>
+                                        <h5>{{ $book->category->name }}</h5>
+                                        <h3><a href="{{ url('ebook/' . $book->slug) }}">{{ Str::limit($book->title, 35) }}</a></h3>
+                                    </div>
+                                    <ul class="shop-icon d-flex justify-content-center align-items-center">
+                                        <li><a href="{{ url('ebook/' . $book->slug) }}"><i class="far fa-eye"></i></a></li>
+                                    </ul>
+                                </div>
+                                <span class="mt-10">Rp {{ number_format($book->price, 0, ',', '.') }}</span>
+                                <div class="shop-btn">
+                                    <a href="javascript:void(0)" onclick="addToCart('{{ $book->id }}', '{{ $book->title }}')" class="theme-btn">
+                                        <i class="fa-solid fa-basket-shopping"></i> Add To Cart
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
 @endsection
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
 
-
+        window.addToCart = function(bookId, bookTitle) {
+            let cart = JSON.parse(localStorage.getItem('ebook_cart')) || [];
+            if (!cart.includes(bookId)) {
+                cart.push(bookId);
+                localStorage.setItem('ebook_cart', JSON.stringify(cart));
+                toastr.success(bookTitle + ' berhasil ditambahkan ke keranjang!');
+            } else {
+                toastr.info('Ebook ini sudah ada di dalam keranjang.');
+            }
+        }
+    </script>
 @endpush

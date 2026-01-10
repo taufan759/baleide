@@ -10,9 +10,25 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role'];
-    protected $hidden = ['password', 'remember_token'];
-    protected $casts = ['email_verified_at' => 'datetime'];
+    protected $fillable = [
+        'name', 
+        'email', 
+        'password', 
+        'phone', 
+        'address', 
+        'avatar', 
+        'role'
+    ];
+
+    protected $hidden = [
+        'password', 
+        'remember_token'
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
     public function transactions()
     {
@@ -24,8 +40,8 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function isSales(): bool
+    public function isUser(): bool
     {
-        return $this->role === 'sales';
+        return $this->role === 'user';
     }
 }

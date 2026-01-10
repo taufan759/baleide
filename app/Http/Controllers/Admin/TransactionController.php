@@ -23,89 +23,80 @@ class TransactionController extends Controller
             'transactions.id',
             'transactions.user_id',
             'transactions.total_amount',
+            'transactions.discount_amount',
             'transactions.payment_status',
-            'transactions.delivery_type',
+            'transactions.midtrans_order_id',
             'transactions.created_at',
             'users.name as user_name'
         )
-        ->join('users', 'transactions.user_id', '=', 'users.id')->orderBy('id', 'desc');
+        ->join('users', 'transactions.user_id', '=', 'users.id');
 
-        // Apply filters
-        if ($request->has('delivery_type') && !empty($request->delivery_type)) {
-            $query->where('transactions.delivery_type', $request->delivery_type);
-        }
-
-        if ($request->has('payment_status') && !empty($request->payment_status)) {
+        if ($request->filled('payment_status')) {
             $query->where('transactions.payment_status', $request->payment_status);
         }
 
-        if ($request->has('start_date') && !empty($request->start_date)) {
-            $startDate = Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
+        if ($request->filled('start_date')) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
             $query->where('transactions.created_at', '>=', $startDate);
         }
 
-        if ($request->has('end_date') && !empty($request->end_date)) {
-            $endDate = Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
+        if ($request->filled('end_date')) {
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
             $query->where('transactions.created_at', '<=', $endDate);
         }
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('user.name', function ($transaction) {
-                return $transaction->user_name;
-            })
-            ->addColumn('action', function ($transaction) {
-                return '<a href="' . url('admin/transactions/show/'. $transaction->id) . '" class="btn btn-sm btn-primary">Detail</a>';
-            })
             ->editColumn('created_at', function ($transaction) {
                 return Carbon::parse($transaction->created_at)->format('d-m-Y H:i');
             })
             ->editColumn('total_amount', function ($transaction) {
                 return 'Rp ' . number_format($transaction->total_amount, 0, ',', '.');
             })
-            ->rawColumns(['action'])
+            ->editColumn('payment_status', function ($transaction) {
+                $status = [
+                    'pending' => 'badge-warning',
+                    'paid'    => 'badge-success',
+                    'failed'  => 'badge-danger',
+                    'expired' => 'badge-secondary',
+                ];
+                $badge = $status[$transaction->payment_status] ?? 'badge-dark';
+                return '<span class="badge ' . $badge . '">' . ucfirst($transaction->payment_status) . '</span>';
+            })
+            ->addColumn('action', function ($transaction) {
+                return '<a href="' . url('admin/transactions/show/'. $transaction->id) . '" class="btn btn-sm btn-primary">Detail</a>';
+            })
+            ->rawColumns(['action', 'payment_status'])
             ->make(true);
     }
 
     public function show($id)
     {
-        $transaction = Transaction::with(['user', 'items.product'])->findOrFail($id);
+        $transaction = Transaction::with(['user', 'items.ebook'])->findOrFail($id);
         return view('admin.transaction.show', compact('transaction'))->with('sb', 'Transaction');
     }
 
     public function print(Request $request)
     {
         $query = Transaction::select(
-            'transactions.id',
-            'transactions.user_id',
-            'transactions.total_amount',
-            'transactions.payment_status',
-            'transactions.delivery_type',
-            'transactions.created_at',
+            'transactions.*',
             'users.name as user_name'
         )
         ->join('users', 'transactions.user_id', '=', 'users.id');
 
-        // Apply filters
-        if ($request->has('delivery_type') && !empty($request->delivery_type)) {
-            $query->where('transactions.delivery_type', $request->delivery_type);
-        }
-
-        if ($request->has('payment_status') && !empty($request->payment_status)) {
+        if ($request->filled('payment_status')) {
             $query->where('transactions.payment_status', $request->payment_status);
         }
 
-        if ($request->has('start_date') && !empty($request->start_date)) {
-            $startDate = Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
-            $query->where('transactions.created_at', '>=', $startDate);
+        if ($request->filled('start_date')) {
+            $query->whereDate('transactions.created_at', '>=', $request->start_date);
         }
 
-        if ($request->has('end_date') && !empty($request->end_date)) {
-            $endDate = Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
-            $query->where('transactions.created_at', '<=', $endDate);
+        if ($request->filled('end_date')) {
+            $query->whereDate('transactions.created_at', '<=', $request->end_date);
         }
 
-        $transactions = $query->orderBy('id', 'desc')->get();
+        $transactions = $query->orderBy('transactions.id', 'desc')->get();
 
         return view('admin.transaction.print', compact('transactions'));
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Data Transaksi</title>
+    <title>Cetak Data Transaksi - Baleide</title>
     <style>
         * {
             box-sizing: border-box;
@@ -35,15 +35,11 @@
             border-bottom: 2px solid #e0e0e0;
         }
 
-        .header img {
-            max-width: 150px;
-            margin-bottom: 10px;
-        }
-
         .header h1 {
             font-size: 24px;
             color: #2c3e50;
             margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
         .header p {
@@ -55,11 +51,11 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 12px 10px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -69,29 +65,28 @@
             color: #fff;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         tr:nth-child(even) {
             background-color: #f8f9fa;
         }
 
-        tr:hover {
-            background-color: #e8f4f8;
-        }
-
-        td {
-            color: #34495e;
-        }
-
         .total-amount {
             font-weight: bold;
-            color: #e74c3c;
+            color: #2c3e50;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
         .footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
             padding-top: 10px;
             border-top: 1px solid #e0e0e0;
             font-size: 12px;
@@ -103,28 +98,18 @@
                 margin: 0;
                 background-color: #fff;
             }
-
             .container {
                 box-shadow: none;
-                padding: 0;
+                width: 100%;
+                max-width: none;
             }
-
-            .no-print {
-                display: none;
-            }
-
-            .header img {
-                max-width: 100px;
-            }
-
             th {
                 background-color: #3498db !important;
+                color: #fff !important;
                 -webkit-print-color-adjust: exact;
             }
-
-            tr:nth-child(even) {
-                background-color: #f8f9fa !important;
-                -webkit-print-color-adjust: exact;
+            .no-print {
+                display: none;
             }
         }
     </style>
@@ -132,36 +117,40 @@
 <body onload="window.print()">
     <div class="container">
         <div class="header">
-            <h1>Data Transaksi</h1>
-            <p>Laporan Transaksi - Dicetak pada {{ date('d-m-Y H:i') }}</p>
+            <h1>Laporan Transaksi Baleide</h1>
+            <p>Dicetak pada: {{ date('d-m-Y H:i') }}</p>
         </div>
+
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>User</th>
-                    <th>Total Amount</th>
-                    <th>Payment Status</th>
-                    <th>Delivery Type</th>
-                    <th>Tanggal</th>
+                    <th width="5%">#</th>
+                    <th width="15%">Order ID</th>
+                    <th width="20%">User / Pelanggan</th>
+                    <th width="15%">Diskon</th>
+                    <th width="15%">Total Bayar</th>
+                    <th width="15%">Status</th>
+                    <th width="15%">Tanggal</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($transactions as $index => $transaction)
                     <tr>
                         <td>{{ $index + 1 }}</td>
+                        <td>{{ $transaction->midtrans_order_id ?? '-' }}</td>
                         <td>{{ $transaction->user_name }}</td>
-                        <td class="total-amount">Rp. {{ number_format($transaction->total_amount,0,',','.') }}</td>
-                        <td>{{ $transaction->payment_status }}</td>
-                        <td>{{ $transaction->delivery_type }}</td>
+                        <td>Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</td>
+                        <td class="total-amount">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
+                        <td>{{ ucfirst($transaction->payment_status) }}</td>
                         <td>{{ $transaction->created_at->format('d-m-Y H:i') }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+
         <div class="footer">
-            <p>&copy; {{ date('Y') }} RAYCORP INDONESIA Semua hak dilindungi.</p>
-            <p>Dicetak oleh: IPOS</p>
+            <p>&copy; {{ date('Y') }} <strong>Baleide</strong>. Semua hak dilindungi.</p>
+            <p>Laporan ini dihasilkan secara otomatis oleh sistem administrasi Baleide.</p>
         </div>
     </div>
 </body>

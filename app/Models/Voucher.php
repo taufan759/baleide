@@ -8,18 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 class Voucher extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'code', 'percent', 'product_id', 'status'];
 
-    static function getCode($code) {
-        $voucher = static::where('code', $code)->first();
-        if($voucher) {
-            return $voucher->percent;
-        }
-        return '0';
-    }
+    protected $fillable = [
+        'name', 
+        'code', 
+        'discount_percent', 
+        'status'
+    ];
 
-    public function product()
+    public static function getCode($code)
     {
-        return $this->belongsTo(Product::class);
+        $voucher = self::where('code', $code)
+                       ->where('status', 'active')
+                       ->first();
+
+        if ($voucher) {
+            return $voucher->discount_percent;
+        }
+
+        return 0;
     }
 }

@@ -19,10 +19,6 @@
             <div class="dropdown-menu dropdown-menu-right">
                 <div class="dropdown-title">Tetap Semangat</div>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item has-icon edit-profile">
-                    <i class="far fa-user"></i> Profile
-                </a>
-                <div class="dropdown-divider"></div>
                 <a href="{{ url('logout') }}" class="dropdown-item has-icon text-danger">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
@@ -34,10 +30,10 @@
 <div class="main-sidebar sidebar-style-2">
     <aside id="sidebar-wrapper">
         <div class="sidebar-brand">
-            <a href="#">IPOS ADMIN</a>
+            <a href="#">BALEIDE ADMIN</a>
         </div>
         <div class="sidebar-brand sidebar-brand-sm">
-            <a href="#">POS</a>
+            <a href="#">BLD</a>
         </div>
         <ul class="sidebar-menu">
             <li class="menu-header">Dashboard</li>
@@ -50,7 +46,7 @@
             <li class="menu-header">Master Data</li>
             <li {{ $sb == 'Category' ? 'class=active' : '' }}>
                 <a class="nav-link" href="{{ url('admin/manage-master/categories') }}">
-                    <i class="fas fa-tags"></i> <span>Merk / Kategori</span>
+                    <i class="fas fa-tags"></i> <span>Kategori</span>
                 </a>
             </li>
             <li {{ $sb == 'Voucher' ? 'class=active' : '' }}>
@@ -58,9 +54,9 @@
                     <i class="fas fa-ticket-alt"></i> <span>Voucher / Diskon</span>
                 </a>
             </li>
-            <li {{ $sb == 'Product' ? 'class=active' : '' }}>
-                <a class="nav-link" href="{{ url('admin/manage-master/products') }}">
-                    <i class="fas fa-box"></i> <span>Produk</span>
+            <li {{ $sb == 'Ebook' ? 'class=active' : '' }}>
+                <a class="nav-link" href="{{ url('admin/manage-master/ebook') }}">
+                    <i class="fas fa-book"></i> <span>Ebook</span>
                 </a>
             </li>
             <li {{ $sb == 'User' ? 'class=active' : '' }}>

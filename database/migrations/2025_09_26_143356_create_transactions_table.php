@@ -10,12 +10,13 @@ return new class extends Migration {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('total_amount');
-            $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
-            $table->enum('delivery_type', ['pickup', 'delivery'])->default('pickup');
-            $table->text('delivery_desc')->nullable();
+            $table->decimal('total_amount', 15, 2);
+            $table->string('voucher_code')->nullable();
+            $table->decimal('discount_amount', 15, 2)->default(0);
+            $table->enum('payment_status', ['pending', 'paid', 'failed', 'expired'])->default('pending');
             $table->string('midtrans_order_id', 100)->unique()->nullable();
             $table->string('midtrans_transaction_id', 100)->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

@@ -8,23 +8,28 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<meta name="description" content="IPOS - Sistem Point of Sale modern dari PT Lunaray Cahya Nanjung untuk mempermudah penjualan, manajemen stok, dan laporan bisnis.">
-<meta name="keywords" content="ipos, point of sale, pos system, aplikasi kasir, manajemen stok, laporan penjualan, PT Lunaray Cahya Nanjung">
-<meta name="author" content="PT Lunaray Cahya Nanjung">
+{{-- SEO Meta Tags --}}
+<meta name="description" content="Baleide - Platform E-book modern untuk akses buku digital terlengkap, manajemen pustaka, dan pengalaman membaca yang nyaman.">
+<meta name="keywords" content="baleide, ebook platform, buku digital, perpustakaan digital, baca buku online, platform edukasi">
+<meta name="author" content="Baleide">
 <meta name="robots" content="index, follow">
 
-<meta property="og:title" content="IPOS - Point of Sale System | PT Lunaray Cahya Nanjung">
-<meta property="og:description" content="IPOS adalah sistem Point of Sale dari PT Lunaray Cahya Nanjung yang membantu bisnis mengelola penjualan, stok, dan laporan dengan mudah.">
+{{-- Open Graph / Facebook --}}
+<meta property="og:type" content="website">
+<meta property="og:title" content="Baleide - Platform E-book Digital & Pustaka Online">
+<meta property="og:description" content="Nikmati akses ribuan koleksi e-book berkualitas dalam satu platform yang mudah digunakan hanya di Baleide.">
 <meta property="og:image" content="{{ asset('assets/img/logo-black.png') }}">
 <meta property="og:url" content="{{ request()->fullUrl() }}">
 
+{{-- Twitter --}}
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="IPOS - Point of Sale System | PT Lunaray Cahya Nanjung">
-<meta name="twitter:description" content="IPOS dari PT Lunaray Cahya Nanjung memudahkan penjualan, stok, dan laporan bisnis.">
+<meta name="twitter:title" content="Baleide - Platform E-book Digital & Pustaka Online">
+<meta name="twitter:description" content="Akses ribuan buku digital dengan mudah dan nyaman melalui platform Baleide.">
 <meta name="twitter:image" content="{{ asset('assets/img/logo-black.png') }}">
 
-<title>IPOS - Point of Sale | PT Lunaray Cahya Nanjung</title>
+<title>Baleide - Digital E-book Platform</title>
 
+{{-- Favicon --}}
 <link rel="icon" href="{{ asset('assets/img/logo-black.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('assets/img/logo-black.png') }}">
 <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('assets/img/logo-black.png') }}">

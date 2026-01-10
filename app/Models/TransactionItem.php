@@ -9,17 +9,21 @@ class TransactionItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['transaction_id', 'product_id', 'qty', 'price', 'subtotal'];
-
-    public $timestamps = false; 
+    protected $fillable = [
+        'transaction_id', 
+        'ebook_id', 
+        'qty', 
+        'price', 
+        'subtotal'
+    ];
 
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
     }
 
-    public function product()
+    public function ebook()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Ebook::class);
     }
 }

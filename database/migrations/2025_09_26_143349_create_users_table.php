@@ -12,7 +12,12 @@ return new class extends Migration {
             $table->string('name', 100);
             $table->string('email', 100)->unique();
             $table->string('password', 255);
-            $table->enum('role', ['admin', 'sales'])->default('sales');
+            $table->string('phone', 20)->nullable();
+            $table->text('address')->nullable();
+            $table->string('avatar')->nullable();
+            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
     }

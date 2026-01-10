@@ -1,45 +1,220 @@
-<div class="flex flex-col items-baseline justify-between border-b-2 border-dashed pt-10 pb-6 sm:flex-row no-print">
-    <div>
-        <h1 class="text-4xl font-bold tracking-tight text-gray-900 flex items-center">
-            <img src="{{ asset('assets/img/logo-black.png') }}" alt="" srcset="" width="100">
-        </h1>
-        <p class="mt-2 text-base text-gray-500">Temukan koleksi produk lunaray pilihan terbaru kami.</p>
-    </div>
-
-    <div class="mt-4 items-center sm:mt-0 flex space-x-4">
-        {{-- 🔍 Search --}}
-        <div class="relative">
-            <form class="lg:w-80 w-64 border border-dashed border-2 rounded-full" id="search-form"
-                action="{{ route('home') }}" method="GET">
-                @foreach (request()->except('search') as $key => $value)
-                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                @endforeach
-                <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <i class="fa fa-search text-gray-500"></i>
+ <!-- Offcanvas Area start  -->
+<div class="fix-area">
+    <div class="offcanvas__info">
+        <div class="offcanvas__wrapper">
+            <div class="offcanvas__content">
+                <div class="offcanvas__top mb-5 d-flex justify-content-between align-items-center">
+                    <div class="offcanvas__logo">
+                        <a>
+                            <img src="{{ asset('assets/img/logo-black.png')}}" alt="logo-img">
+                        </a>
                     </div>
-                    <input type="search" name="search" value="{{ request('search') }}" placeholder="Cari produk..."
-                        id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 rounded-full" />
-                    <button type="submit"
-                        class="text-white absolute end-2.5 bottom-2.5 bg-indigo-700 hover:bg-blue-800 font-medium rounded-full text-sm px-4 py-2">Search</button>
+                    <div class="offcanvas__close">
+                        <button>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-            </form>
+                <p class="text d-none d-xl-block">
+                    Belajar lebih mudah, kapan saja, di mana saja. Temukan ilmu baru dan kembangkan potensi terbaikmu.
+                </p>
+                <div class="mobile-menu fix mb-3"></div>
+                <div class="offcanvas__contact">
+                    <h4>Info Kontak Kami</h4>
+                    <ul>
+                        <li class="d-flex align-items-center">
+                            <div class="offcanvas__contact-icon">
+                                <i class="fal fa-map-marker-alt"></i>
+                            </div>
+                            <div class="offcanvas__contact-text">
+                                <a target="_blank" href="#">Nanjung Industrial Park Kab Bandung, Jawa Barat</a>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <div class="offcanvas__contact-icon mr-15">
+                                <i class="fal fa-envelope"></i>
+                            </div>
+                            <div class="offcanvas__contact-text">
+                                <a href="mailto:mail@baleide.com"><span
+                                        class="mailto:mail@baleide.com">mail@baleide.com</span></a>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="header-button mt-4">
+                        <a href="/contact" class="theme-btn text-center">
+                            Hubungi Kami <i class="fa-solid fa-arrow-right-long"></i>
+                        </a>
+                    </div>
+                   
+                </div>
+            </div>
         </div>
-
-        <div class="relative">
-            <a href="/cart" type="button" id="cart-btn"
-                class="text-gray-600 hover:text-indigo-600 text-2xl relative">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span id="cart-count"
-                    class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-2 py-0.5">0</span>
-            </a>
-        </div>
-
-        <button type="button" command="show-modal" commandfor="mobile-filters"
-            class=" lg:hidden text-gray-600 hover:text-indigo-600 text-2xl relative">
-            <span class="sr-only">Filter</span>
-            <i class="fa-solid fa-filter"></i>
-        </button>
     </div>
 </div>
+<div class="offcanvas__overlay"></div>
+
+<div class="header-top-1">
+    <div class="container">
+        <div class="header-top-wrapper">
+            <ul class="contact-list">
+                <li>
+                    <i class="fa-regular fa-phone"></i>
+                    <a href="tel:+6281329995238">+62 813-2999-5238</a>
+                </li>
+                <li>
+                    <i class="far fa-envelope"></i>
+                    <a href="mailto:mail@baleide.com">mail@baleide.com</a>
+                </li>
+                <li>
+                    <i class="far fa-clock"></i>
+                    <span id="realtime-clock">Memuat waktu...</span>
+                </li>
+            </ul>
+            <ul class="list">
+                @auth
+                    <li><i class="fa-light fa-gauge"></i>
+                        <a href="{{ url('/dashboard') }}">
+                            Dashboard
+                        </a>
+                    </li>
+                @else
+                    <li><i class="fa-light fa-user"></i>
+                        <a href="{{ route('login') }}">
+                            Login
+                        </a>
+                    </li>
+                @endauth
+            </ul>
+        </div>
+    </div>
+</div>
+
+<header class="header-1 sticky-header">
+    <div class="mega-menu-wrapper">
+        <div class="header-main">
+            <div class="container">
+                <div class="row">
+                    <div class="col-6 col-md-6 col-lg-10 col-xl-8 col-xxl-10">
+                        <div class="header-left">
+                            <div class="logo">
+                                <a href="{{ url('/') }}" class="header-logo">
+                                    <img src="{{ asset('assets/img/logo-baleide-white.webp')}}" alt="logo-img">
+                                </a>
+                            </div>
+                            <div class="mean__menu-wrapper">
+                                <div class="main-menu">
+                                    <nav>
+                                        <ul>
+                                            <li>
+                                                <a href="{{ url('/') }}">Home</a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ url('/ebook') }}">E-Book</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0)">
+                                                    Category
+                                                    <i class="fas fa-angle-down"></i>
+                                                </a>
+                                                <ul class="submenu">
+                                                    @foreach($categories as $category)
+                                                        <li><a href="{{ url('/category/' . $category->slug) }}">{{ $category->name }}</a></li>
+                                                    @endforeach
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <a href="{{ url('/contact') }}">Contact</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6 col-lg-2 col-xl-4 col-xxl-2">
+                        <div class="header-right">
+                            <div class="menu-cart">
+                               <a href="{{ url('/cart') }}" class="cart-icon">
+                                    <i class="fa-regular fa-cart-shopping"></i>
+                                    <span class="cart-badge" id="cart-count">0</span>
+                                </a>
+                                <div class="header-humbager ml-30">
+                                    <a class="sidebar__toggle" href="javascript:void(0)">
+                                        <div class="bar-icon-2">
+                                            <img src="{{ asset('client/assets/img/icon/icon-13.svg')}}" alt="img">
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<header class="header-1">
+    <div class="mega-menu-wrapper">
+        <div class="header-main">
+            <div class="container">
+                <div class="row">
+                    <div class="col-6 col-md-6 col-lg-10 col-xl-8 col-xxl-10">
+                        <div class="header-left">
+                            <div class="logo">
+                                <a href="{{ url('/') }}" class="header-logo">
+                                    <img src="{{ asset('assets/img/logo-baleide-white.webp')}}" alt="logo-img">
+                                </a>
+                            </div>
+                            <div class="mean__menu-wrapper">
+                                <div class="main-menu">
+                                    <nav id="mobile-menu">
+                                        <ul>
+                                            <li>
+                                                <a href="{{ url('/') }}">Home</a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ url('/ebook') }}">E-Book</a>
+                                            </li>
+                                            <li>
+                                                <a href="javascript:void(0)">
+                                                    Category
+                                                    <i class="fas fa-angle-down"></i>
+                                                </a>
+                                                <ul class="submenu">
+                                                    @foreach($categories as $category)
+                                                        <li><a href="{{ url('/category/' . $category->slug) }}">{{ $category->name }}</a></li>
+                                                    @endforeach
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <a href="{{ url('/contact') }}">Contact</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6 col-lg-2 col-xl-4 col-xxl-2">
+                        <div class="header-right">
+                            <div class="menu-cart">
+                                <a href="{{ url('/cart') }}" class="cart-icon">
+                                    <i class="fa-regular fa-cart-shopping"></i>
+                                    <span class="cart-badge" id="cart-count">0</span>
+                                </a>
+                                <div class="header-humbager ml-30">
+                                    <a class="sidebar__toggle" href="javascript:void(0)">
+                                        <div class="bar-icon-2">
+                                            <img src="{{ asset('client/assets/img/icon/icon-13.svg')}}" alt="img">
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

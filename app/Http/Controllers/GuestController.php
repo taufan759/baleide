@@ -4,165 +4,183 @@ namespace App\Http\Controllers;
 
 use Midtrans\Snap;
 use Midtrans\Config;
-use App\Models\Product;
+use App\Models\Ebook;
 use App\Models\Voucher;
 use App\Models\Category;
 use Midtrans\Notification;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\TransactionItem;
-use Illuminate\Support\Facades\Log;
 
 class GuestController extends Controller
 {
     /**
-     * Display the home page with a list of products.
+     * 1. HOME: Menampilkan Top Categories, Populer, Baru, dan List Kategori
      */
-    public function home(Request $request)
+    public function home()
     {
-        $categories = Category::select(['id', 'name', 'slug', 'description'])->get();
+        // Semua kategori untuk navigasi/sidebar
+        $categories = Category::all();
 
-        $query = Product::where('status', 'Y')->where('price', '>', 0)->select(['id', 'category_id', 'name', 'slug', 'price', 'price_real', 'stock'])->with([
-            'category' => fn($query) => $query->select(['id', 'name', 'slug']),
-            'photos' 
-        ]);
+        // Section 1: Top Categories (Diambil 5 buku secara acak/random sebagai sorotan)
+        $topBooks = Ebook::with(['photos', 'category'])
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
 
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
+        // Section 2: Buku Populer (Diambil 6 buku)
+        $popularBooks = Ebook::with(['photos', 'category'])
+            ->inRandomOrder()
+            ->take(6)
+            ->get();
 
-        if ($request->has('category')) {
-            $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
-        }
+        // Section 3: Buku Baru Dirilis (Berdasarkan created_at terbaru)
+        $latestBooks = Ebook::with(['photos', 'category'])
+            ->latest()
+            ->take(6)
+            ->get();
 
-        $products = $query->inRandomOrder()->paginate(12);
-
-        return view('guest.home', compact('categories', 'products'));
+        return view('guest.home', compact('categories', 'topBooks', 'popularBooks', 'latestBooks'));
     }
 
+    /**
+     * 2. KATEGORI: Menampilkan buku berdasarkan kategori
+     */
+    public function showCategory($slug)
+    {
+        $categories = Category::all();
+        $category = Category::where('slug', $slug)->firstOrFail();
+        
+        $books = Ebook::with(['photos', 'category'])
+            ->where('category_id', $category->id)
+            ->latest()
+            ->paginate(12);
+
+        return view('guest.category', compact('category', 'books', 'categories'));
+    }
+
+    /**
+     * 3. BUKU: Menampilkan semua list buku dengan pagination & Search
+     */
+    public function allBooks(Request $request)
+    {
+        $categories = Category::all();
+        $query = Ebook::with(['photos', 'category']);
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('author', 'like', '%' . $request->search . '%');
+        }
+
+        $books = $query->latest()->paginate(12);
+
+        return view('guest.books', compact('books', 'categories'));
+    }
+
+    /**
+     * 4. DETAIL BUKU: Detail informasi dan Rekomendasi terkait
+     */
+    public function showEbook($slug)
+    {
+        $categories = Category::all();
+        $book = Ebook::with(['photos', 'category'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // Rekomendasi: Buku lain di kategori yang sama (Limit 4)
+        $recommendations = Ebook::with(['photos'])
+            ->where('category_id', $book->category_id)
+            // ->where('id', '!=', $book->id)
+            ->take(4)
+            ->get();
+
+        return view('guest.detail-ebook', compact('book', 'recommendations', 'categories'));
+    }
+
+    /**
+     * 5. CART: Hanya view (Data dihandle JavaScript/LocalStorage)
+     */
     public function showCart()
     {
-        $categories = Category::select(['id', 'name', 'slug'])->get();
+        $categories = Category::all();
         return view('guest.cart', compact('categories'));
     }
 
     public function fetchCart(Request $request)
     {
-        $productIds = $request->input('ids', []);
-        $products = Product::where('status', 'Y')->whereIn('id', $productIds)->get();
+        $ids = $request->input('ids', []);
 
-        return response()->json($products);
+        if (empty($ids)) {
+            return response()->json([]);
+        }
+
+        $ebooks = Ebook::whereIn('id', $ids)
+            ->with(['photos', 'category'])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id'        => $item->id,
+                    'title'     => $item->title,
+                    'price'     => (float) $item->price,
+                    'slug'      => $item->slug,
+                    'category'  => $item->category ? $item->category->name : 'Uncategorized',
+                    'cover_url' => $item->photos->first() 
+                                    ? asset($item->photos->first()->photo) 
+                                    : asset('assets/img/default-ebook.png'),
+                ];
+            });
+
+        return response()->json($ebooks);
     }
 
     /**
-     * Display a single product's details by slug.
+     * 6. PAYMENT: Checkout Snap Midtrans
      */
-    public function showProduct($slug)
-    {
-        $product = Product::where('status', 'Y')->select(['id', 'category_id', 'name', 'slug', 'price', 'stock', 'price_real', 'neto', 'pieces'])
-            ->with([
-                'category' => fn($query) => $query->select(['id', 'name', 'slug', 'description']),
-                'photos' => fn($query) => $query->select(['id', 'id_product', 'foto']),
-            ])
-            ->where('slug', $slug)
-            ->firstOrFail();
-        $categories = Category::orderBy('name', 'asc')->get();
-
-        return view('guest.detail-product', compact('product', 'categories'));
-    }
-
     public function checkout(Request $request)
     {
+        $ebookIds = $request->input('ebook_ids', []);
+        
+        if (empty($ebookIds)) {
+            return response()->json(['message' => 'Keranjang kosong'], 400);
+        }
+
         $grossAmount = 0;
         $itemDetails = [];
-        $discount = 0;
-        $voucherCode = null;
+        $selectedEbooks = Ebook::whereIn('id', $ebookIds)->get();
 
-        if ($request->has('voucher') && !empty($request->voucher)) {
-            $voucher = Voucher::where('code', $request->voucher)->first();
-            if ($voucher && $voucher->status === 'ACTIVE') {
-                $discount = $voucher->percent;
-                $voucherCode = $voucher->code;
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $voucher ? 'Voucher tidak aktif.' : 'Voucher tidak ditemukan.'
-                ], 400);
-            }
-        }
-
-        if ($request->has('items')) {
-            $items = $request->items;
-
-            foreach ($items as $item) {
-                $product = Product::where('status', 'Y')->findOrFail($item['id']);
-                $quantity = (int) $item['quantity'];
-                $subtotal = $product->price * $quantity;
-                $grossAmount += $subtotal;
-
-                $itemDetails[] = [
-                    'id' => (string) $product->id,
-                    'price' => (int) $product->price,
-                    'quantity' => $quantity,
-                    'name' => substr($product->name, 0, 50),
-                ];
-            }
-        } else {
-            $product = Product::where('status', 'Y')->findOrFail($request->product_id);
-            $quantity = (int) $request->quantity;
-            $grossAmount = $product->price * $quantity;
-
-            $itemDetails[] = [
-                'id' => (string) $product->id,
-                'price' => (int) $product->price,
-                'quantity' => $quantity,
-                'name' => substr($product->name, 0, 50),
-            ];
-            $items = [
-                [
-                    'id' => $request->product_id,
-                    'quantity' => $quantity,
-                    'price' => $product->price,
-                ],
-            ];
-        }
-
-        $discountAmount = $discount ? ($grossAmount * $discount / 100) : 0;
-        $finalAmount = $grossAmount - $discountAmount;
-
-        if ($discountAmount > 0) {
-            $itemDetails[] = [
-                'id' => 'DISCOUNT',
-                'price' => -(int)$discountAmount,
-                'quantity' => 1,
-                'name' => 'Discount ' . $discount . '%',
-            ];
+        if ($selectedEbooks->isEmpty()) {
+            return response()->json(['message' => 'Produk tidak ditemukan'], 404);
         }
 
         $transaction = Transaction::create([
             'user_id' => auth()->id(),
-            'total_amount' => $finalAmount,
+            'total_amount' => 0, 
             'payment_status' => 'pending',
-            'delivery_type' => $request->delivery_type ?? 'pickup',
-            'delivery_desc' => $request->delivery_desc,
-            'voucher_code' => $voucherCode,
-            'discount' => $discountAmount,
-            'midtrans_order_id' => uniqid('ORDER-'),
+            'midtrans_order_id' => 'BALEIDE-' . time() . '-' . auth()->id(),
+            'discount_amount' => 0, 
         ]);
 
-        foreach ($items as $item) {
-            $product = Product::where('status', 'Y')->findOrFail($item['id']);
-            $quantity = (int) $item['quantity'];
-            $subtotal = $product->price * $quantity;
+        foreach ($selectedEbooks as $ebook) {
+            $price = (int) $ebook->price;
+            $grossAmount += $price;
 
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
-                'product_id' => $product->id,
-                'qty' => $quantity,
-                'price' => $product->price,
-                'subtotal' => $subtotal,
+                'ebook_id' => $ebook->id,
+                'qty' => 1,
+                'price' => $price,
+                'subtotal' => $price,
             ]);
+
+            $itemDetails[] = [
+                'id' => (string) $ebook->id,
+                'price' => $price,
+                'quantity' => 1,
+                'name' => substr($ebook->title, 0, 50),
+            ];
         }
+
+        $transaction->update(['total_amount' => $grossAmount]);
 
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
@@ -172,100 +190,128 @@ class GuestController extends Controller
         $params = [
             'transaction_details' => [
                 'order_id' => $transaction->midtrans_order_id,
-                'gross_amount' => (int) $finalAmount,
+                'gross_amount' => (int) $grossAmount,
             ],
             'item_details' => $itemDetails,
             'customer_details' => [
-                'first_name' => auth()->user()->name ?? 'Guest',
-                'email' => auth()->user()->email ?? 'guest@example.com',
-                'phone' => auth()->user()->phone ?? '08123456789',
+                'first_name' => auth()->user()->name,
+                'email' => auth()->user()->email,
             ],
-            'custom_field1' => $request->delivery_type ?? '',
-            'custom_field2' => $request->delivery_desc ?? '',
         ];
 
-        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            return response()->json([
+                'snap_token' => $snapToken,
+                'order_id' => $transaction->midtrans_order_id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function callback(Request $request)
+    {
+        $orderId = $request->order_id;
+        $status = $request->transaction_status;
+
+        $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
+        }
+
+        if (in_array($status, ['settlement', 'capture'])) {
+            $transaction->update([
+                'payment_status' => 'paid',
+                'midtrans_transaction_id' => $request->transaction_id ?? $transaction->midtrans_transaction_id
+            ]);
+        } elseif ($status == 'pending') {
+            $transaction->update(['payment_status' => 'pending']);
+        } elseif (in_array($status, ['deny', 'expire', 'cancel'])) {
+            $transaction->update(['payment_status' => 'failed']);
+        }
 
         return response()->json([
-            'snap_token' => $snapToken,
+            'status' => 'success',
+            'message' => 'Status transaksi berhasil diperbarui',
+            'current_status' => $transaction->payment_status
         ]);
     }
 
-    // Callback dari Midtrans
-    public function callback(Request $request)
+    public function buyNow($slug)
     {
-        $orderId = $request->input('order_id');
-        $transactionStatus = $request->input('transaction_status');
-        $transactionId = $request->input('transaction_id');
-        $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
+        $ebook = Ebook::where('slug', $slug)->firstOrFail();
+        
+        $transaction = Transaction::create([
+            'user_id' => auth()->id(),
+            'total_amount' => $ebook->price,
+            'payment_status' => 'pending',
+            'midtrans_order_id' => 'QUICK-' . time() . '-' . auth()->id(),
+            'discount_amount' => 0,
+        ]);
 
-        if ($transaction) {
-            if (in_array($transactionStatus, ['capture', 'settlement'])) {
-                $transaction->update(['payment_status' => 'paid']);
-            } elseif ($transactionStatus == 'pending') {
-                $transaction->update(['payment_status' => 'pending']);
-            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
-                $transaction->update(['payment_status' => 'failed']);
-            }
+        TransactionItem::create([
+            'transaction_id' => $transaction->id,
+            'ebook_id' => $ebook->id,
+            'qty' => 1,
+            'price' => $ebook->price,
+            'subtotal' => $ebook->price,
+        ]);
 
-            if ($transactionId) {
-                $transaction->update([
-                    'midtrans_transaction_id' => $transactionId,
-                ]);
-            }
-        }
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = config('midtrans.is_production');
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
 
-        return response()->json(['status' => 'ok']);
+        $params = [
+            'transaction_details' => [
+                'order_id' => $transaction->midtrans_order_id,
+                'gross_amount' => (int) $ebook->price,
+            ],
+            'customer_details' => [
+                'first_name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+            ],
+        ];
+
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $categories = Category::all();
+
+        return view('guest.checkout_direct', compact('ebook', 'snapToken', 'transaction', 'categories'));
     }
 
     public function success(Request $request)
     {
-        $orderId = $request->input('order');
-        if(!$orderId) {
-            abort(404);
-        }
-        $transaction = Transaction::where('midtrans_order_id', $orderId)->with(['items'])->first();
-        if(!$transaction) {
-            abort(404);
-        }
-        $categories = Category::select(['id', 'name', 'slug'])->get();
-        return view('guest.checkout-success', compact('categories', 'transaction'));
+        $categories = Category::all();
+        $orderId = $request->query('order');
+        $transaction = Transaction::where('midtrans_order_id', $orderId)
+                        ->with('items.ebook')
+                        ->firstOrFail();
+
+        return view('guest.checkout-success', compact('transaction', 'categories'));
+    }
+    
+    /**
+     * 7. KONTAK
+     */
+    public function contact()
+    {
+        $categories = Category::all();
+        return view('guest.contact', compact('categories'));
     }
 
-
-    /**
-     * Cek validitas kode voucher
-     */
-    public function voucher(Request $request)
+    public function contactSend(Request $request)
     {
         $request->validate([
-            'voucher' => 'required|string'
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'message' => 'required',
         ]);
 
-        $voucher = Voucher::where('code', $request->voucher)->first();
+        // Mail::to('admin@example.com')->send(new ContactMail($request->all()));
 
-        if (!$voucher) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kode voucher tidak ditemukan.'
-            ], 404);
-        }
-
-        if ($voucher->status == 'NON ACTIVE') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Voucher sudah tidak aktif.'
-            ], 400);
-        }
-      
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Voucher valid.',
-            'data' => [
-                'code' => $voucher->code,
-                'discount' => $voucher->percent,
-                'name' => $voucher->name,
-            ]
-        ]);
+        return back()->with('success', 'Pesan Anda telah berhasil dikirim!');
     }
 }

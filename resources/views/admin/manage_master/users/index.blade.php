@@ -12,7 +12,8 @@
 
             <div class="section-body">
                 <h2 class="section-title">Data User</h2>
-                <p class="section-lead">Berikut adalah Data User.</p>
+                <p class="section-lead">Kelola data administrator dan pelanggan Baleide.</p>
+                
                 @if (session()->has('message'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session()->get('message') }}
@@ -21,93 +22,85 @@
                         </button>
                     </div>
                 @endif
-                @if (session()->has('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ session()->get('error') }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                @endif
+                
                 <div class="card">
                     <div class="card-header">
                         <h4>Data Seluruh User</h4>
                         <div class="card-header-form">
-                            <div class="dropdown d-inline dropleft">
-                                <button type="button" class="btn btn-primary btn-sm dropdown-toggle" aria-haspopup="true"
-                                    data-toggle="dropdown" aria-expanded="false">
-                                    Tambah
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" data-toggle="modal" data-target="#addModal"
-                                            href="#">Input Manual</a></li>
-                                </ul>
-                            </div>
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal">
+                                <i class="fas fa-plus"></i> Tambah User
+                            </button>
                         </div>
                     </div>
                     <div class="card-body">
-                        <table class="table table-striped mt-5">
-                            <thead>
-                                <tr>
-                                    <th width="10px">#</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th width="10px">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="userTable">
+                                <thead>
+                                    <tr>
+                                        <th width="10px">#</th>
+                                        <th>Avatar</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Role</th>
+                                        <th width="10px">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- Add Modal -->
-    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModal" aria-hidden="true">
+    <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addModal">Tambah User</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <h5 class="modal-title">Tambah User</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form action="{{ url('admin/manage-master/users') }}" method="POST" class="needs-validation" novalidate="">
+                <form action="{{ url('admin/manage-master/users') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate="">
                     @csrf
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" placeholder="Masukkan Nama" class="form-control" name="name" required="">
-                            <div class="invalid-feedback">
-                                Masukkan Nama User
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nama Lengkap</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" class="form-control" name="password" required minlength="8">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>No. Phone</label>
+                                    <input type="text" class="form-control" name="phone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Role</label>
+                                    <select name="role" class="form-control" required="">
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Avatar</label>
+                                    <input type="file" class="form-control" name="avatar">
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" placeholder="Masukkan Email" class="form-control" name="email" required="">
-                            <div class="invalid-feedback">
-                                Masukkan Email User
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" placeholder="Masukkan Password" class="form-control" name="password" required="">
-                            <div class="invalid-feedback">
-                                Masukkan Password
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <select name="role" class="form-control" required="">
-                                <option value="admin">Admin</option>
-                                <option value="sales">Sales</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                Pilih Role
-                            </div>
+                            <label>Alamat</label>
+                            <textarea name="address" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -118,50 +111,53 @@
         </div>
     </div>
 
-    <!-- Update Modal -->
-    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModal" aria-hidden="true">
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="updateModal">Update User</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <h5 class="modal-title">Update User</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <form action="{{ url('admin/manage-master/users/update') }}" method="POST" class="needs-validation" novalidate="">
+                <form action="{{ url('admin/manage-master/users/update') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate="">
                     @csrf
                     <input type="hidden" name="id" id="id">
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" placeholder="Masukkan Nama" class="form-control" name="name" required="" id="name">
-                            <div class="invalid-feedback">
-                                Masukkan Nama User
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nama Lengkap</label>
+                                    <input type="text" class="form-control" name="name" id="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" name="email" id="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Password (Kosongkan jika tidak diubah)</label>
+                                    <input type="password" class="form-control" name="password">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>No. Phone</label>
+                                    <input type="text" class="form-control" name="phone" id="phone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Role</label>
+                                    <select name="role" id="role" class="form-control" required="">
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ganti Avatar</label>
+                                    <input type="file" class="form-control" name="avatar">
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" placeholder="Masukkan Email" class="form-control" name="email" required="" id="email">
-                            <div class="invalid-feedback">
-                                Masukkan Email User
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" placeholder="Masukkan Password (kosongkan jika tidak diubah)" class="form-control" name="password" id="password">
-                            <div class="invalid-feedback">
-                                Masukkan Password
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <select name="role" class="form-control" required="" id="role">
-                                <option value="admin">Admin</option>
-                                <option value="sales">Sales</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                Pilih Role
-                            </div>
+                            <label>Alamat</label>
+                            <textarea name="address" id="address" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -173,93 +169,70 @@
     </div>
 
     <script>
-        // DataTable initialization
         $(document).ready(function() {
-            $('.table').DataTable({
-                responsive: true,
+            var table = $('#userTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: {
-                    url: "{{ url('admin/manage-master/users/all') }}",
-                    type: "GET"
-                },
+                ajax: "{{ url('admin/manage-master/users/all') }}",
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+                    { 
+                        data: 'avatar', 
+                        name: 'avatar',
+                        render: function(data) {
+                            let src = data ? "{{ asset('assets/avatar') }}/" + data : "{{ asset('assets/img/avatar.png') }}";
+                            return `<img src="${src}" class="rounded-circle" width="35" height="35">`;
+                        }
+                    },
                     { data: 'name', name: 'name' },
                     { data: 'email', name: 'email' },
-                    { data: 'role', name: 'role' },
-                    { data: 'action', name: 'action' }
+                    { data: 'phone', name: 'phone', defaultContent: '-' },
+                    { 
+                        data: 'role', 
+                        name: 'role',
+                        render: function(data) {
+                            return data === 'admin' ? '<span class="badge badge-danger">Admin</span>' : '<span class="badge badge-primary">User</span>';
+                        }
+                    },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
                 ]
             });
 
-            // Edit button handler
-            $('.table').on('click', '.edit[data-id]', function(e) {
-                e.preventDefault();
+            $('#userTable').on('click', '.edit', function() {
+                let id = $(this).data('id');
                 $.ajax({
-                    data: {
-                        'id': $(this).data('id'),
-                        '_token': "{{ csrf_token() }}"
-                    },
                     type: 'POST',
                     url: "{{ url('admin/manage-master/users/get') }}",
-                    beforeSend: function() {
-                        $.LoadingOverlay("show", {
-                            image: "",
-                            fontawesome: "fa fa-cog fa-spin"
-                        });
-                    },
-                    complete: function() {
-                        $.LoadingOverlay("hide");
-                    },
+                    data: { id: id, _token: "{{ csrf_token() }}" },
                     success: function(data) {
                         $('#id').val(data.id);
                         $('#name').val(data.name);
                         $('#email').val(data.email);
                         $('#role').val(data.role);
+                        $('#phone').val(data.phone);
+                        $('#address').val(data.address);
                         $('#updateModal').modal('show');
-                    },
-                    error: function(err) {
-                        alert('Error: ' + err.responseText);
-                        console.log(err);
                     }
                 });
             });
 
-            // Delete button handler
-            $('.table').on('click', '.hapus[data-id]', function(e) {
+            $('#userTable').on('click', '.hapus', function(e) {
                 e.preventDefault();
+                let id = $(this).data('id');
                 swal({
                     title: "Hapus User?",
-                    text: "Data User ini akan dihapus secara permanen!",
                     icon: "warning",
                     buttons: true,
                     dangerMode: true,
                 }).then((willDelete) => {
                     if (willDelete) {
                         $.ajax({
-                            data: {
-                                'id': $(this).data('id'),
-                                '_token': "{{ csrf_token() }}"
-                            },
                             type: 'DELETE',
                             url: "{{ url('admin/manage-master/users') }}",
-                            beforeSend: function() {
-                                $.LoadingOverlay("show", {
-                                    image: "",
-                                    fontawesome: "fa fa-cog fa-spin"
-                                });
-                            },
-                            complete: function() {
-                                $.LoadingOverlay("hide");
-                            },
+                            data: { id: id, _token: "{{ csrf_token() }}" },
                             success: function(data) {
-                                swal(data.message).then(() => {
-                                    location.reload();
-                                });
-                            },
-                            error: function(err) {
-                                alert('Error: ' + err.responseText);
-                                console.log(err);
+                                swal(data.message, { icon: "success" });
+                                table.ajax.reload();
                             }
                         });
                     }

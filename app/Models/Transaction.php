@@ -13,12 +13,11 @@ class Transaction extends Model
         'user_id',
         'total_amount',
         'payment_status',
-        'delivery_type',
-        'delivery_desc',
         'voucher_code',
         'discount',
         'midtrans_order_id',
         'midtrans_transaction_id',
+        'notes',
     ];
 
     public function user()
@@ -27,6 +26,11 @@ class Transaction extends Model
     }
 
     public function items()
+    {
+        return $this->hasMany(TransactionItem::class);
+    }
+
+    public function transactionItems()
     {
         return $this->hasMany(TransactionItem::class);
     }

@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
+use File;
 
 class UserController extends Controller
 {
@@ -18,12 +19,15 @@ class UserController extends Controller
 
     public function getall(Request $request)
     {
-        $query = User::select('id', 'name', 'email', 'role')
-                ->orderBy('name', 'ASC')
+        $query = User::select('id', 'name', 'email', 'role', 'phone', 'avatar', 'created_at')
+                ->orderBy('created_at', 'DESC')
                 ->get();
 
         return DataTables::of($query)
             ->addIndexColumn()
+            ->editColumn('created_at', function ($user) {
+                return $user->created_at->format('d-m-Y H:i');
+            })
             ->addColumn('action', function (User $user) {
                 return '
                 <div class="dropdown d-inline dropleft">
@@ -31,8 +35,8 @@ class UserController extends Controller
                         Action
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a data-id="' . $user->id . '" class="dropdown-item edit">Edit</a></li>
-                        <li><a data-id="' . $user->id . '" class="dropdown-item hapus" href="#">Hapus</a></li>
+                        <li><a data-id="' . $user->id . '" class="dropdown-item edit" style="cursor:pointer">Edit</a></li>
+                        <li><a data-id="' . $user->id . '" class="dropdown-item hapus" href="#" style="cursor:pointer">Hapus</a></li>
                     </ul>
                 </div>
                 ';
@@ -44,64 +48,80 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'email' => 'required|string|email|max:100|unique:users,email',
-            'password' => 'required|string',
-            'role' => 'required|in:admin,sales',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|string|email|max:100|unique:users,email',
+            'password' => 'required|string|min:3',
+            'role'     => 'required|in:admin,user',
+            'phone'    => 'nullable|string|max:20',
+            'avatar'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $avatarName = null;
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            $avatarName = 'avatar_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/avatar'), $avatarName);
+        }
+
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role'     => $request->role,
+            'phone'    => $request->phone,
+            'address'  => $request->address,
+            'avatar'   => $avatarName,
         ]);
 
-        return redirect()->back()->with('message', 'Data user berhasil disimpan');
+        return redirect()->back()->with('message', 'User berhasil ditambahkan');
     }
 
     public function get(Request $request)
     {
-        return response()->json(
-            User::findOrFail($request->id),
-            200
-        );
+        return response()->json(User::findOrFail($request->id), 200);
     }
 
     public function update(Request $request)
     {
-        $id = $request->id;
-        if (!$id) {
-            return redirect()->back()->with('error', 'ID user tidak ditemukan');
-        }
-        $user = User::findOrFail($id);
+        $user = User::findOrFail($request->id);
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'email' => 'required|string|email|max:100|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8',
-            'role' => 'required|in:admin,sales',
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|string|email|max:100|unique:users,email,' . $user->id,
+            'role'     => 'required|in:admin,user',
+            'avatar'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $updateData = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-        ];
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar && file_exists(public_path('assets/avatar/' . $user->avatar))) {
+                unlink(public_path('assets/avatar/' . $user->avatar));
+            }
 
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
+            $file = $request->file('avatar');
+            $avatarName = 'avatar_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/avatar'), $avatarName);
+            $user->avatar = $avatarName;
         }
 
-        $user->update($updateData);
+        $user->name    = $request->name;
+        $user->email   = $request->email;
+        $user->role    = $request->role;
+        $user->phone   = $request->phone;
+        $user->address = $request->address;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
 
         return redirect()->back()->with('message', 'Data user berhasil diupdate');
     }
@@ -109,6 +129,11 @@ class UserController extends Controller
     public function delete(Request $request)
     {
         $user = User::findOrFail($request->id);
+        
+        if ($user->avatar && file_exists(public_path('assets/avatar/' . $user->avatar))) {
+            unlink(public_path('assets/avatar/' . $user->avatar));
+        }
+
         $user->delete();
         return response()->json(['message' => 'Data user berhasil dihapus'], 200);
     }
