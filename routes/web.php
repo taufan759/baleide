@@ -24,13 +24,11 @@ use App\Http\Controllers\Admin\ManageMaster\CategoryController as CategoryAdmin;
 */
 
 # -------------------- AUTH --------------------
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'index'])->name('login');
-    Route::get('/register', [AuthController::class, 'registerView'])->name('register');
-    
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,60');
-});
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::get('/register', [AuthController::class, 'registerView'])->name('register');
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,60');
 
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');

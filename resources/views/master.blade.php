@@ -24,17 +24,21 @@
 
     <div id="app">
         <div class="main-wrapper">
-            @if (Auth::user()?->role === 'admin')
-                @include('layout.sb_admin')
-            @elseif (Auth::user()?->role === 'user')
-                @include('layout.sb_user')
-            @endif
+            @auth
+                @if (Auth::user()?->role === 'admin')
+                    @include('layout.sb_admin')
+                @elseif (Auth::user()?->role === 'user')
+                    @include('layout.sb_user')
+                @endif
+            @endauth
 
             @yield('content')
 
-            @if (Auth::user()?->role === 'admin' || Auth::user()?->role === 'user')
-                @include('layout.footer')
-            @endif
+            @auth
+                @if (Auth::user()?->role === 'admin' || Auth::user()?->role === 'user')
+                    @include('layout.footer')
+                @endif
+            @endauth
         </div>
     </div>
 
