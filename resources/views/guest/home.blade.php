@@ -13,7 +13,7 @@
                 <div class="col-12 col-xl-8 col-lg-6">
                     <div class="hero-items">
                         <div class="book-shape">
-                            <img src="https://baleide.id/wp-content/uploads/2025/05/Vector-orange1.png" alt="shape-img">
+                            <img src="{{ asset('assets/img/shape.png') }}" alt="shape-img">
                         </div>
                         <div class="frame-shape1 float-bob-x">
                             <img src="{{ asset('client/assets/img/hero/frame.png')}}" alt="shape-img">
@@ -37,7 +37,7 @@
                             <h6 class="wow fadeInUp" data-wow-delay=".3s">Baleide</h6>
                             <h1 class="wow fadeInUp" data-wow-delay=".5s">Platform Belajar Online <br> Untuk Skill Nyata</h1>
                             <div class="form-clt wow fadeInUp" data-wow-delay=".9s">
-                                <a href="/book" class="theme-btn">
+                                <a href="/ebook" class="theme-btn">
                                     Baca Buku Sekarang <i class="fa-solid fa-arrow-right-long"></i>
                                 </a>
                             </div>
@@ -46,7 +46,7 @@
                 </div>
                 <div class="col-12 col-xl-4 col-lg-6">
                     <div class="girl-image">
-                        <img class=" float-bob-x" src="https://baleide.id/wp-content/uploads/2025/05/image-herosection.png" alt="img">
+                        <img class=" float-bob-x" src="{{ asset('assets/img/banner-3.webp') }}" alt="img">
                     </div>
                 </div>
             </div>

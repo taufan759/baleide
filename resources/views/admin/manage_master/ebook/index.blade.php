@@ -300,6 +300,7 @@
                 sisa = split[0].length % 3,
                 rupiah = split[0].substr(0, sisa),
                 ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
             if (ribuan) {
                 separator = sisa ? '.' : '';
                 rupiah += separator + ribuan.join('.');
@@ -308,7 +309,7 @@
         }
 
         $(document).ready(function() {
-            $('.table').DataTable({
+            var table = $('.table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ url('admin/manage-master/ebook/all') }}",
@@ -320,7 +321,7 @@
                     { data: 'price_display', name: 'price_display' },
                     { data: 'stock', name: 'stock' },
                     { data: 'photos_preview', name: 'photos_preview' },
-                    { data: 'file_preview', name: 'file_preview' }, 
+                    { data: 'file_preview', name: 'file_preview' },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ]
             });
@@ -343,6 +344,61 @@
                 });
             });
 
+            $('#photos_update').on('change', function() {
+                let preview = $('#preview-update').find('.new-preview');
+                if(preview.length === 0) {
+                    $('#preview-update').append('<div class="w-100 d-block mb-2 text-muted new-preview-label">Foto Baru:</div><div class="new-preview d-flex flex-wrap"></div>');
+                    preview = $('#preview-update').find('.new-preview');
+                }
+                preview.empty();
+                Array.from(this.files).forEach(file => {
+                    let reader = new FileReader();
+                    reader.onload = (e) => {
+                        preview.append(`<img src="${e.target.result}" class="img-thumbnail mr-2 mb-2" style="width:80px">`);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            // AJAX ADD SUBMIT
+            $('#addModal form').on('submit', function(e) {
+                e.preventDefault();
+                let form = $(this);
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function() {
+                        form.find('button[type="submit"]').attr('disabled', true).text('Menyimpan...');
+                    },
+                    success: function(response) {
+                        $('#addModal').modal('hide');
+                        swal("Berhasil!", "Ebook berhasil ditambahkan.", "success");
+                        table.ajax.reload();
+                        form[0].reset();
+                        $('#preview-add').empty();
+                        form.find('.raw_price').val('');
+                    },
+                    error: function(xhr) {
+                        let msg = "Terjadi kesalahan pada server.";
+                        if(xhr.responseJSON && xhr.responseJSON.errors) {
+                            msg = Object.values(xhr.responseJSON.errors)[0][0];
+                        } else if(xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        swal("Gagal!", msg, "error");
+                    },
+                    complete: function() {
+                        form.find('button[type="submit"]').attr('disabled', false).text('Simpan');
+                    }
+                });
+            });
+
+            // EDIT BUTTON FETCH DATA
             $('.table').on('click', '.edit', function() {
                 let id = $(this).data('id');
                 $.post("{{ url('admin/manage-master/ebook/get') }}", {id: id, _token: "{{ csrf_token() }}"}, function(data) {
@@ -367,15 +423,55 @@
 
                     let preview = $('#preview-update');
                     preview.empty();
-                    data.photos.forEach(p => {
-                        preview.append(`
-                            <div class="position-relative mr-2 mb-2 photo-item" data-id="${p.id}">
-                                <img src="{{ asset('') }}${p.photo}" class="img-thumbnail" style="width:80px">
-                                <button type="button" class="btn btn-danger btn-sm position-absolute btn-remove-photo" style="top:-5px;right:-5px;padding:0 5px">×</button>
-                            </div>
-                        `);
-                    });
+                    if(data.photos) {
+                        data.photos.forEach(p => {
+                            preview.append(`
+                                <div class="position-relative mr-2 mb-2 photo-item" data-id="${p.id}">
+                                    <img src="{{ asset('') }}${p.photo}" class="img-thumbnail" style="width:80px">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute btn-remove-photo" style="top:-5px;right:-5px;padding:0 5px">×</button>
+                                </div>
+                            `);
+                        });
+                    }
                     $('#updateModal').modal('show');
+                }).fail(function() {
+                    swal("Error!", "Gagal mengambil data ebook.", "error");
+                });
+            });
+
+            // AJAX UPDATE SUBMIT
+            $('#updateModal form').on('submit', function(e) {
+                e.preventDefault();
+                let form = $(this);
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function() {
+                        form.find('button[type="submit"]').attr('disabled', true).text('Mengupdate...');
+                    },
+                    success: function(response) {
+                        $('#updateModal').modal('hide');
+                        swal("Berhasil!", "Ebook berhasil diperbarui.", "success");
+                        table.ajax.reload();
+                        $('#photos_update').val(''); 
+                    },
+                    error: function(xhr) {
+                        let msg = "Terjadi kesalahan pada server.";
+                        if(xhr.responseJSON && xhr.responseJSON.errors) {
+                            msg = Object.values(xhr.responseJSON.errors)[0][0];
+                        } else if(xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        swal("Gagal!", msg, "error");
+                    },
+                    complete: function() {
+                        form.find('button[type="submit"]').attr('disabled', false).text('Update');
+                    }
                 });
             });
 
@@ -403,11 +499,19 @@
                             data: {id: id, _token: "{{ csrf_token() }}"},
                             success: function(res) {
                                 swal(res.message, {icon: "success"});
-                                $('.table').DataTable().ajax.reload();
+                                table.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                swal("Gagal!", "Data gagal dihapus.", "error");
                             }
                         });
                     }
                 });
+            });
+            
+            $('#addModal').on('hidden.bs.modal', function () {
+                $(this).find('form')[0].reset();
+                $('#preview-add').empty();
             });
         });
     </script>

@@ -130,7 +130,7 @@ class EbookController extends Controller
             }
         }
 
-        return redirect()->back()->with('message', 'Ebook berhasil ditambahkan');
+        return response()->json(['message' => 'Ebook berhasil ditambahkan'], 200);
     }
 
     public function update(Request $request)
@@ -207,7 +207,7 @@ class EbookController extends Controller
             }
         }
 
-        return redirect()->back()->with('message', 'Ebook berhasil diperbarui');
+        return response()->json(['message' => 'Ebook berhasil diperbarui'], 200);
     }
 
     public function delete(Request $request)
