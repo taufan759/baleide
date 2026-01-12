@@ -98,7 +98,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 });
 
 # -------------------- USER DASHBOARD --------------------
-Route::prefix('dashboard')->middleware(['auth', 'role:user'])->group(function () {
+Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     
     # Menu Dashboard
     Route::get('/', [DashboardUser::class, 'index']);
