@@ -1,6 +1,21 @@
 @extends('guest')
 
 @section('title', $book->title)
+@section('meta_title', $book->title . ' - Baleide Store')
+
+@section('meta_description', Str::limit(strip_tags($book->description), 150))
+
+@section('meta_keywords', 'ebook ' . $book->category->name . ', beli buku ' . $book->title . ', ' . $book->author)
+
+@section('meta_author', $book->author)
+
+@section('meta_image')
+    @php
+        $metaCover = $book->photos->first();
+        $metaImgUrl = $metaCover ? asset($metaCover->photo) : asset('assets/img/default-ebook.png');
+    @endphp
+    {{ $metaImgUrl }}
+@endsection
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">

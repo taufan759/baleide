@@ -87,10 +87,9 @@ class GuestController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        // Rekomendasi: Buku lain di kategori yang sama (Limit 4)
         $recommendations = Ebook::with(['photos'])
             ->where('category_id', $book->category_id)
-            // ->where('id', '!=', $book->id)
+            ->where('id', '!=', $book->id)
             ->take(4)
             ->get();
 
