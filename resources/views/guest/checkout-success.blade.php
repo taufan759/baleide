@@ -21,12 +21,31 @@
                         <td class="text-end">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                     </tr>
                     @endforeach
-                    <tr class="border-top">
-                        <strong>
+                    
+                    @if($transaction->discount_amount > 0)
+                        <tr class="border-top">
+                            <td>Subtotal</td>
+                            <td class="text-end">Rp {{ number_format($transaction->total_amount + $transaction->discount_amount, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr class="text-danger">
+                            <td>
+                                Diskon 
+                                @if($transaction->voucher_code)
+                                    <small>({{ $transaction->voucher_code }})</small>
+                                @endif
+                            </td>
+                            <td class="text-end">- Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr class="border-top fw-bold">
                             <td>Total Bayar</td>
                             <td class="text-end text-primary">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
-                        </strong>
-                    </tr>
+                        </tr>
+                    @else
+                        <tr class="border-top fw-bold">
+                            <td>Total Bayar</td>
+                            <td class="text-end text-primary">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
+                        </tr>
+                    @endif
                 </table>
             </div>
         </div>

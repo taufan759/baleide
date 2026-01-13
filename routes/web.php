@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\VoucherController;
 
 # Admin Controllers
 use App\Http\Controllers\User\MyBookController;
@@ -41,8 +42,10 @@ Route::get('/ebook/{slug}', [GuestController::class, 'showEbook'])->name('ebook.
 Route::get('/category/{slug}', [GuestController::class, 'showCategory'])->name('category.show');
 Route::get('/cart', [GuestController::class, 'showCart'])->name('cart.show');
 Route::post('/cart/fetch', [GuestController::class, 'fetchCart'])->name('cart.fetch');
+Route::post('/voucher/check', [VoucherController::class, 'checkVoucher'])->name('voucher.check');
 Route::post('/checkout', [GuestController::class, 'checkout'])->name('checkout');
 Route::get('/checkout/{slug}', [GuestController::class, 'buyNow'])->name('checkout.buyNow')->middleware('auth');
+Route::post('/process-direct-checkout', [GuestController::class, 'processDirectCheckout'])->name('checkout.processDirect');
 Route::post('/midtrans/callback', [GuestController::class, 'callback'])->name('midtrans.callback')->middleware('auth');
 Route::get('/checkout-success', [GuestController::class, 'success'])->name('checkout.success');
 Route::get('/contact', [GuestController::class, 'contact'])->name('contact');

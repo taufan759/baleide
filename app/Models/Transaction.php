@@ -14,7 +14,7 @@ class Transaction extends Model
         'total_amount',
         'payment_status',
         'voucher_code',
-        'discount',
+        'discount_amount',
         'midtrans_order_id',
         'midtrans_transaction_id',
         'notes',

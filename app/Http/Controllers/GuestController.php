@@ -139,6 +139,7 @@ class GuestController extends Controller
     public function checkout(Request $request)
     {
         $ebookIds = $request->input('ebook_ids', []);
+        $voucherCode = $request->input('voucher_code');
         
         if (empty($ebookIds)) {
             return response()->json(['message' => 'Keranjang kosong'], 400);
@@ -152,17 +153,37 @@ class GuestController extends Controller
             return response()->json(['message' => 'Produk tidak ditemukan'], 404);
         }
 
+        foreach ($selectedEbooks as $ebook) {
+            $grossAmount += (int) $ebook->price;
+        }
+
+        $discountAmount = 0;
+        $voucherId = null;
+        
+        if ($voucherCode) {
+            $voucher = Voucher::where('code', strtoupper(trim($voucherCode)))
+                ->where('status', 'active')
+                ->first();
+                
+            if ($voucher) {
+                $discountAmount = ($grossAmount * $voucher->discount_percent) / 100;
+                $voucherId = $voucher->id;
+            }
+        }
+
+        $finalAmount = max(0, $grossAmount - $discountAmount);
+
         $transaction = Transaction::create([
             'user_id' => auth()->id(),
-            'total_amount' => 0, 
+            'total_amount' => $finalAmount, 
             'payment_status' => 'pending',
             'midtrans_order_id' => 'BALEIDE-' . time() . '-' . auth()->id(),
-            'discount_amount' => 0, 
+            'discount_amount' => $discountAmount,
+            'voucher_code' => $voucherCode,
         ]);
 
         foreach ($selectedEbooks as $ebook) {
             $price = (int) $ebook->price;
-            $grossAmount += $price;
 
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
@@ -180,7 +201,14 @@ class GuestController extends Controller
             ];
         }
 
-        $transaction->update(['total_amount' => $grossAmount]);
+        if ($discountAmount > 0) {
+            $itemDetails[] = [
+                'id' => 'DISCOUNT',
+                'price' => -$discountAmount,
+                'quantity' => 1,
+                'name' => 'Diskon Voucher: ' . $voucherCode,
+            ];
+        }
 
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
@@ -190,7 +218,7 @@ class GuestController extends Controller
         $params = [
             'transaction_details' => [
                 'order_id' => $transaction->midtrans_order_id,
-                'gross_amount' => (int) $grossAmount,
+                'gross_amount' => (int) $finalAmount,
             ],
             'item_details' => $itemDetails,
             'customer_details' => [
@@ -243,21 +271,48 @@ class GuestController extends Controller
     public function buyNow($slug)
     {
         $ebook = Ebook::where('slug', $slug)->firstOrFail();
+        $categories = Category::all();
+
+        return view('guest.checkout_direct', compact('ebook', 'categories'));
+    }
+
+    public function processDirectCheckout(Request $request)
+    {
+        $ebookId = $request->input('ebook_id');
+        $voucherCode = $request->input('voucher_code');
         
+        $ebook = Ebook::findOrFail($ebookId);
+        
+        $grossAmount = (int) $ebook->price;
+        $discountAmount = 0;
+        
+        if ($voucherCode) {
+            $voucher = Voucher::where('code', strtoupper(trim($voucherCode)))
+                ->where('status', 'active')
+                ->first();
+                
+            if ($voucher) {
+                $discountAmount = ($grossAmount * $voucher->discount_percent) / 100;
+            }
+        }
+        
+        $finalAmount = max(0, $grossAmount - $discountAmount);
+
         $transaction = Transaction::create([
             'user_id' => auth()->id(),
-            'total_amount' => $ebook->price,
+            'total_amount' => $finalAmount,
             'payment_status' => 'pending',
-            'midtrans_order_id' => 'QUICK-' . time() . '-' . auth()->id(),
-            'discount_amount' => 0,
+            'midtrans_order_id' => 'BALEIDE-' . time() . '-' . auth()->id(),
+            'discount_amount' => $discountAmount,
+            'voucher_code' => $voucherCode, 
         ]);
 
         TransactionItem::create([
             'transaction_id' => $transaction->id,
             'ebook_id' => $ebook->id,
             'qty' => 1,
-            'price' => $ebook->price,
-            'subtotal' => $ebook->price,
+            'price' => $grossAmount,
+            'subtotal' => $grossAmount,
         ]);
 
         \Midtrans\Config::$serverKey = config('midtrans.server_key');
@@ -265,21 +320,46 @@ class GuestController extends Controller
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
 
+        $itemDetails = [
+            [
+                'id' => (string) $ebook->id,
+                'price' => $grossAmount,
+                'quantity' => 1,
+                'name' => substr($ebook->title, 0, 50),
+            ]
+        ];
+
+        if ($discountAmount > 0) {
+            $itemDetails[] = [
+                'id' => 'DISCOUNT',
+                'price' => -(int)$discountAmount,
+                'quantity' => 1,
+                'name' => 'Voucher: ' . $voucherCode,
+            ];
+        }
+
         $params = [
             'transaction_details' => [
                 'order_id' => $transaction->midtrans_order_id,
-                'gross_amount' => (int) $ebook->price,
+                'gross_amount' => (int) $finalAmount,
             ],
+            'item_details' => $itemDetails,
             'customer_details' => [
                 'first_name' => auth()->user()->name,
                 'email' => auth()->user()->email,
             ],
         ];
 
-        $snapToken = \Midtrans\Snap::getSnapToken($params);
-        $categories = Category::all();
-
-        return view('guest.checkout_direct', compact('ebook', 'snapToken', 'transaction', 'categories'));
+        try {
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            return response()->json([
+                'success' => true,
+                'snap_token' => $snapToken,
+                'order_id' => $transaction->midtrans_order_id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function success(Request $request)
