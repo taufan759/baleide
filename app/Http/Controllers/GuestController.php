@@ -19,22 +19,18 @@ class GuestController extends Controller
      */
     public function home()
     {
-        // Semua kategori untuk navigasi/sidebar
         $categories = Category::all();
 
-        // Section 1: Top Categories (Diambil 5 buku secara acak/random sebagai sorotan)
         $topBooks = Ebook::with(['photos', 'category'])
             ->inRandomOrder()
             ->take(5)
             ->get();
 
-        // Section 2: Buku Populer (Diambil 6 buku)
         $popularBooks = Ebook::with(['photos', 'category'])
             ->inRandomOrder()
             ->take(6)
             ->get();
 
-        // Section 3: Buku Baru Dirilis (Berdasarkan created_at terbaru)
         $latestBooks = Ebook::with(['photos', 'category'])
             ->latest()
             ->take(6)
@@ -157,7 +153,6 @@ class GuestController extends Controller
         }
 
         $discountAmount = 0;
-        $voucherId = null;
         
         if ($voucherCode) {
             $voucher = Voucher::where('code', strtoupper(trim($voucherCode)))
@@ -166,16 +161,17 @@ class GuestController extends Controller
                 
             if ($voucher) {
                 $discountAmount = ($grossAmount * $voucher->discount_percent) / 100;
-                $voucherId = $voucher->id;
             }
         }
 
         $finalAmount = max(0, $grossAmount - $discountAmount);
 
+        $initialStatus = ($finalAmount == 0) ? 'paid' : 'pending';
+
         $transaction = Transaction::create([
             'user_id' => auth()->id(),
             'total_amount' => $finalAmount, 
-            'payment_status' => 'pending',
+            'payment_status' => $initialStatus,
             'midtrans_order_id' => 'BALEIDE-' . time() . '-' . auth()->id(),
             'discount_amount' => $discountAmount,
             'voucher_code' => $voucherCode,
@@ -198,6 +194,16 @@ class GuestController extends Controller
                 'quantity' => 1,
                 'name' => substr($ebook->title, 0, 50),
             ];
+        }
+
+        if ($finalAmount == 0) {
+            return response()->json([
+                'status' => 'success',
+                'is_free' => true, 
+                'message' => 'Transaksi berhasil (Gratis)',
+                'order_id' => $transaction->midtrans_order_id,
+                'snap_token' => null 
+            ]);
         }
 
         if ($discountAmount > 0) {
@@ -229,6 +235,8 @@ class GuestController extends Controller
         try {
             $snapToken = Snap::getSnapToken($params);
             return response()->json([
+                'status' => 'pending',
+                'is_free' => false,
                 'snap_token' => $snapToken,
                 'order_id' => $transaction->midtrans_order_id
             ]);
@@ -297,10 +305,12 @@ class GuestController extends Controller
         
         $finalAmount = max(0, $grossAmount - $discountAmount);
 
+        $initialStatus = ($finalAmount == 0) ? 'paid' : 'pending';
+
         $transaction = Transaction::create([
             'user_id' => auth()->id(),
             'total_amount' => $finalAmount,
-            'payment_status' => 'pending',
+            'payment_status' => $initialStatus, 
             'midtrans_order_id' => 'BALEIDE-' . time() . '-' . auth()->id(),
             'discount_amount' => $discountAmount,
             'voucher_code' => $voucherCode, 
@@ -313,6 +323,16 @@ class GuestController extends Controller
             'price' => $grossAmount,
             'subtotal' => $grossAmount,
         ]);
+
+        if ($finalAmount == 0) {
+            return response()->json([
+                'success' => true,
+                'is_free' => true, 
+                'message' => 'Transaksi berhasil (Gratis)',
+                'snap_token' => null,
+                'order_id' => $transaction->midtrans_order_id
+            ]);
+        }
 
         \Midtrans\Config::$serverKey = config('midtrans.server_key');
         \Midtrans\Config::$isProduction = config('midtrans.is_production');
@@ -353,6 +373,7 @@ class GuestController extends Controller
             $snapToken = \Midtrans\Snap::getSnapToken($params);
             return response()->json([
                 'success' => true,
+                'is_free' => false,
                 'snap_token' => $snapToken,
                 'order_id' => $transaction->midtrans_order_id
             ]);

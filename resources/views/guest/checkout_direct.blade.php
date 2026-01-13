@@ -66,7 +66,6 @@
 @endsection
 
 @push('scripts')
-{{-- Library JS --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -176,20 +175,27 @@
             Swal.close();
 
             if (result.success) {
-                window.snap.pay(result.snap_token, {
-                    onSuccess: function(res) {
-                        fetch("/midtrans/callback", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                            body: JSON.stringify({ order_id: res.order_id, transaction_status: res.transaction_status, transaction_id: res.transaction_id })
-                        }).then(() => {
-                            window.location.href = "/checkout-success?order=" + res.order_id;
-                        });
-                    },
-                    onPending: function(res) { window.location.href = "/dashboard"; },
-                    onError: function(res) { toastr.error("Pembayaran gagal"); },
-                    onClose: function() { toastr.warning("Pembayaran belum diselesaikan"); }
-                });
+                if (result.is_free === true) {
+                    toastr.success(result.message);
+                    setTimeout(() => {
+                        window.location.href = "/checkout-success?order=" + result.order_id;
+                    }, 1000);
+                } else if (result.snap_token) {
+                    window.snap.pay(result.snap_token, {
+                        onSuccess: function(res) {
+                            fetch("/midtrans/callback", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                                body: JSON.stringify({ order_id: res.order_id, transaction_status: res.transaction_status, transaction_id: res.transaction_id })
+                            }).then(() => {
+                                window.location.href = "/checkout-success?order=" + res.order_id;
+                            });
+                        },
+                        onPending: function(res) { window.location.href = "/dashboard"; },
+                        onError: function(res) { toastr.error("Pembayaran gagal"); },
+                        onClose: function() { toastr.warning("Pembayaran belum diselesaikan"); }
+                    });
+                }
             } else {
                 toastr.error(result.message || "Gagal memproses transaksi");
             }

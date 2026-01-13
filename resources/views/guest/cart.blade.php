@@ -471,9 +471,7 @@
             title: 'Sedang memproses',
             text: 'Mohon tunggu sebentar...',
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+            didOpen: () => { Swal.showLoading(); }
         });
 
         try {
@@ -484,28 +482,48 @@
             });
 
             const result = await response.json();
-
             Swal.close();
 
             if (response.ok) {
-                window.snap.pay(result.snap_token, {
-                    onSuccess: function(res) {
-                        localStorage.removeItem("ebook_cart");
-                        fetch("/midtrans/callback", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                            body: JSON.stringify({ order_id: res.order_id, transaction_status: res.transaction_status, transaction_id: res.transaction_id })
-                        }).then(() => {
-                            window.location.href = "/checkout-success?order=" + res.order_id;
-                        });
-                    },
-                    onPending: function(res) {
-                        toastr.info("Pembayaran tertunda");
-                    },
-                    onError: function(res) {
-                        toastr.error("Pembayaran gagal");
-                    }
-                });
+                
+                if (result.is_free === true) {
+                    localStorage.removeItem("ebook_cart");
+                    toastr.success("Transaksi Berhasil (Gratis)!");
+                    setTimeout(() => {
+                        window.location.href = "/checkout-success?order=" + result.order_id;
+                    }, 1000);
+                } 
+                else if (result.snap_token) {
+                    window.snap.pay(result.snap_token, {
+                        onSuccess: function(res) {
+                            localStorage.removeItem("ebook_cart");
+                            
+                            fetch("/midtrans/callback", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                                body: JSON.stringify({ 
+                                    order_id: res.order_id, 
+                                    transaction_status: res.transaction_status, 
+                                    transaction_id: res.transaction_id 
+                                })
+                            }).then(() => {
+                                window.location.href = "/checkout-success?order=" + res.order_id;
+                            });
+                        },
+                        onPending: function(res) {
+                            toastr.info("Pembayaran tertunda, silakan selesaikan pembayaran.");
+                        },
+                        onError: function(res) {
+                            toastr.error("Pembayaran gagal");
+                        },
+                        onClose: function() {
+                            toastr.warning('Anda menutup popup pembayaran.');
+                        }
+                    });
+                } else {
+                    toastr.error("Terjadi kesalahan: Token pembayaran tidak ditemukan.");
+                }
+
             } else {
                 toastr.error(result.message || "Gagal memproses checkout");
             }
