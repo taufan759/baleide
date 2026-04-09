@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\ArticleGuestController;
 
 # Admin Controllers
 use App\Http\Controllers\User\MyBookController;
@@ -12,6 +13,9 @@ use App\Http\Controllers\User\TransactionController;
 use App\Http\Controllers\User\DashboardController as DashboardUser;
 use App\Http\Controllers\Admin\DashboardController as DashboardAdmin;
 use App\Http\Controllers\Admin\ManageMaster\UserController as UserAdmin;
+use App\Http\Controllers\Admin\ManageMaster\ArticleController as ArticleAdmin;
+use App\Http\Controllers\Admin\ManageMaster\ArticleCategoryController as ArticleCategoryAdmin;
+use App\Http\Controllers\Admin\ManageMaster\TagController as TagAdmin;
 # Sales Controllers
 use App\Http\Controllers\Admin\TransactionController as TransactionAdmin;
 use App\Http\Controllers\Admin\ManageMaster\EbookController as EbookAdmin;
@@ -40,6 +44,10 @@ Route::get('/', [GuestController::class, 'home'])->name('home');
 Route::get('/ebook', [GuestController::class, 'allBooks'])->name('allBooks');
 Route::get('/ebook/{slug}', [GuestController::class, 'showEbook'])->name('ebook.show');
 Route::get('/category/{slug}', [GuestController::class, 'showCategory'])->name('category.show');
+Route::get('/artikel', [ArticleGuestController::class, 'allArticles'])->name('article.index');
+Route::get('/artikel/{slug}', [ArticleGuestController::class, 'showArticle'])->name('article.show');
+Route::get('/artikel/kategori/{slug}', [ArticleGuestController::class, 'showArticleCategory'])->name('article.category');
+Route::get('/artikel/tag/{slug}', [ArticleGuestController::class, 'showArticleTag'])->name('article.tag');
 Route::get('/cart', [GuestController::class, 'showCart'])->name('cart.show');
 Route::post('/cart/fetch', [GuestController::class, 'fetchCart'])->name('cart.fetch');
 Route::post('/voucher/check', [VoucherController::class, 'checkVoucher'])->name('voucher.check');
@@ -66,6 +74,36 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
             Route::post('update', [UserAdmin::class, 'update']);
             Route::delete('/', [UserAdmin::class, 'delete']);
         });
+        
+        // Artikel
+        Route::prefix('artikel')->group(function () {
+            Route::get('/', [ArticleAdmin::class, 'index']);
+            Route::post('/', [ArticleAdmin::class, 'create']);
+            Route::get('all', [ArticleAdmin::class, 'getall']);
+            Route::post('get', [ArticleAdmin::class, 'get']);
+            Route::post('update', [ArticleAdmin::class, 'update']);
+            Route::delete('/', [ArticleAdmin::class, 'delete']);
+        });
+
+        // Kategori Artikel
+        Route::prefix('artikel-kategori')->group(function () {
+            Route::get('/', [ArticleCategoryAdmin::class, 'index']);
+            Route::post('/', [ArticleCategoryAdmin::class, 'create']);
+            Route::get('all', [ArticleCategoryAdmin::class, 'getall']);
+            Route::post('get', [ArticleCategoryAdmin::class, 'get']);
+            Route::post('update', [ArticleCategoryAdmin::class, 'update']);
+            Route::delete('/', [ArticleCategoryAdmin::class, 'delete']);
+        });
+
+        // Tag Artikel
+        Route::prefix('tag')->group(function () {
+            Route::get('/', [TagAdmin::class, 'index']);
+            Route::post('/', [TagAdmin::class, 'create']);
+            Route::get('all', [TagAdmin::class, 'getall']);
+            Route::post('get', [TagAdmin::class, 'get']);
+            Route::post('update', [TagAdmin::class, 'update']);
+            Route::delete('/', [TagAdmin::class, 'delete']);
+        });
         Route::prefix('categories')->group(function () {
             Route::get('/', [CategoryAdmin::class, 'index']);
             Route::post('/', [CategoryAdmin::class, 'create']);
@@ -91,7 +129,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
             Route::delete('/', [EbookAdmin::class, 'delete']);
         });
     });
-
     Route::prefix('transactions')->group(function () {
         Route::get('/', [TransactionAdmin::class, 'index']);
         Route::get('all', [TransactionAdmin::class, 'getall']);
