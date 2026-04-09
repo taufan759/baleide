@@ -9,81 +9,128 @@ use Illuminate\Http\Request;
 
 class ArticleGuestController extends Controller
 {
-    // Halaman daftar semua artikel
+    /**
+     * Menampilkan semua artikel (halaman index)
+     */
     public function allArticles(Request $request)
     {
-        $query = Article::with(['categories', 'tags'])
-            ->orderBy('created_at', 'desc');
+        $articles = Article::with(['categories', 'tags'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(9);
 
-        // Search
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%")
-                  ->orWhere('author', 'like', "%{$search}%");
-            });
-        }
+        $categories = ArticleCategory::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        $articles = $query->paginate(12);
-        $categories = ArticleCategory::withCount('articles')->get();
-        $tags = Tag::withCount('articles')->get();
+        $tags = Tag::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        return view('guest.article.index', compact('articles', 'categories', 'tags'));
+        // Artikel terbaru untuk sidebar
+        $recentArticles = Article::orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('guest.article.index', compact(
+            'articles',
+            'categories',
+            'tags',
+            'recentArticles'
+        ));
     }
 
-    // Halaman detail artikel
+    /**
+     * Menampilkan detail artikel
+     */
     public function showArticle($slug)
     {
         $article = Article::with(['categories', 'tags'])
             ->where('slug', $slug)
             ->firstOrFail();
 
-        // Artikel terkait dari kategori yang sama
-        $relatedArticles = Article::with(['categories', 'tags'])
-            ->whereHas('categories', function($query) use ($article) {
+        $categories = ArticleCategory::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $tags = Tag::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Artikel terkait berdasarkan kategori yang sama
+        $relatedArticles = Article::whereHas('categories', function($query) use ($article) {
                 $query->whereIn('article_categories.id', $article->categories->pluck('id'));
             })
             ->where('id', '!=', $article->id)
             ->limit(3)
             ->get();
 
-        return view('guest.article.show', compact('article', 'relatedArticles'));
+        return view('guest.article.show', compact(
+            'article',
+            'categories',
+            'tags',
+            'relatedArticles'
+        ));
     }
 
-    // Halaman artikel berdasarkan kategori
+    /**
+     * Menampilkan artikel berdasarkan kategori
+     */
     public function showArticleCategory($slug)
     {
         $category = ArticleCategory::where('slug', $slug)->firstOrFail();
-        
-        $articles = Article::with(['categories', 'tags'])
-            ->whereHas('categories', function($query) use ($category) {
+
+        // Ambil artikel yang memiliki kategori ini
+        $articles = Article::whereHas('categories', function($query) use ($category) {
                 $query->where('article_categories.id', $category->id);
             })
+            ->with(['categories', 'tags'])
             ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->paginate(9);
 
-        $allCategories = ArticleCategory::withCount('articles')->get();
-        $tags = Tag::withCount('articles')->get();
+        $categories = ArticleCategory::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        return view('guest.article.category', compact('category', 'articles', 'allCategories', 'tags'));
+        $tags = Tag::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('guest.article.category', compact(
+            'category',
+            'articles',
+            'categories',
+            'tags'
+        ));
     }
 
-    // Halaman artikel berdasarkan tag
+    /**
+     * Menampilkan artikel berdasarkan tag
+     */
     public function showArticleTag($slug)
     {
         $tag = Tag::where('slug', $slug)->firstOrFail();
-        
-        $articles = Article::with(['categories', 'tags'])
-            ->whereHas('tags', function($query) use ($tag) {
+
+        // Ambil artikel yang memiliki tag ini
+        $articles = Article::whereHas('tags', function($query) use ($tag) {
                 $query->where('tags.id', $tag->id);
             })
+            ->with(['categories', 'tags'])
             ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->paginate(9);
 
-        $categories = ArticleCategory::withCount('articles')->get();
-        $allTags = Tag::withCount('articles')->get();
+        $categories = ArticleCategory::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        return view('guest.article.tag', compact('tag', 'articles', 'categories', 'allTags'));
+        $allTags = Tag::withCount('articles')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('guest.article.tag', compact(
+            'tag',
+            'articles',
+            'categories',
+            'allTags'
+        ));
     }
 }

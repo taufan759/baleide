@@ -184,7 +184,7 @@
         </div>
     </section>
 
-    <section class="top-ratting-book-section fix section-padding section-bg">
+        <section class="top-ratting-book-section fix section-padding section-bg">
         <div class="container">
             <div class="top-ratting-book-wrapper">
                 <div class="section-title-area">
@@ -232,6 +232,62 @@
             </div>
         </div>
     </section>
+
+    <!-- SECTION ARTIKEL BARU -->
+    @if(isset($latestArticles) && $latestArticles->count() > 0)
+    <section class="news-section section-padding">
+        <div class="container">
+            <div class="section-title-area">
+                <div class="section-title">
+                    <h2 class="wow fadeInUp" data-wow-delay=".3s">Artikel Terbaru</h2>
+                </div>
+                <a href="{{ url('artikel') }}" class="theme-btn transparent-btn wow fadeInUp" data-wow-delay=".5s">
+                    Lihat Semua Artikel <i class="fa-solid fa-arrow-right-long"></i>
+                </a>
+            </div>
+            <div class="row">
+                @foreach($latestArticles as $article)
+                <div class="col-xl-4 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay=".3s">
+                    <div class="news-card-items">
+                        <div class="news-image">
+                            <a href="{{ url('artikel/' . $article->slug) }}">
+                                @if($article->thumbnail)
+                                <img src="{{ asset($article->thumbnail) }}" alt="{{ $article->title }}" style="height: 250px; object-fit: cover; width: 100%;">
+                                @else
+                                <img src="{{ asset('assets/img/default-article.png') }}" alt="{{ $article->title }}" style="height: 250px; object-fit: cover; width: 100%;">
+                                @endif
+                            </a>
+                        </div>
+                        <div class="news-content">
+                            <ul class="post-meta">
+                                <li>
+                                    <i class="fa-solid fa-user"></i>
+                                    {{ $article->author }}
+                                </li>
+                                <li>
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                    {{ $article->created_at->format('d M Y') }}
+                                </li>
+                            </ul>
+                            <h3>
+                                <a href="{{ url('artikel/' . $article->slug) }}">
+                                    {{ Str::limit($article->title, 60) }}
+                                </a>
+                            </h3>
+                            <p>
+                                {{ Str::limit($article->excerpt ?? strip_tags($article->content), 100) }}
+                            </p>
+                            <a href="{{ url('artikel/' . $article->slug) }}" class="link-btn">
+                                Baca Selengkapnya <i class="fa-solid fa-arrow-right-long"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
 @endsection
 
 @push('scripts')

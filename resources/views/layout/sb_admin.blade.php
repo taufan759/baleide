@@ -65,6 +65,23 @@
                 </a>
             </li>
 
+            <li class="menu-header">Konten</li>
+            <li {{ $sb == 'Article' ? 'class=active' : '' }}>
+                <a class="nav-link" href="{{ url('admin/manage-master/artikel') }}">
+                    <i class="fas fa-newspaper"></i> <span>Artikel</span>
+                </a>
+            </li>
+            <li {{ $sb == 'ArticleCategory' ? 'class=active' : '' }}>
+                <a class="nav-link" href="{{ url('admin/manage-master/artikel-kategori') }}">
+                    <i class="fas fa-folder-open"></i> <span>Kategori Artikel</span>
+                </a>
+            </li>
+            <li {{ $sb == 'Tag' ? 'class=active' : '' }}>
+                <a class="nav-link" href="{{ url('admin/manage-master/tag') }}">
+                    <i class="fas fa-tag"></i> <span>Tag Artikel</span>
+                </a>
+            </li>
+
             <li class="menu-header">Transaksi</li>
             <li {{ $sb == 'Transaction' ? 'class=active' : '' }}>
                 <a class="nav-link" href="{{ url('admin/transactions') }}">

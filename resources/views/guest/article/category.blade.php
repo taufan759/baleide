@@ -1,13 +1,13 @@
 @extends('guest')
 
-@section('title', 'Semua Artikel')
+@section('title', 'Kategori: ' . $category->name)
 
 @section('content')
 <!-- Breadcrumb -->
 <div class="breadcrumb-wrapper">
     <div class="container">
         <div class="page-heading">
-            <h1>Artikel</h1>
+            <h1>Kategori: {{ $category->name }}</h1>
             <div class="page-header">
                 <ul class="breadcrumb-items wow fadeInUp" data-wow-delay=".3s">
                     <li>
@@ -16,7 +16,13 @@
                     <li>
                         <i class="fa-solid fa-chevron-right"></i>
                     </li>
-                    <li>Artikel</li>
+                    <li>
+                        <a href="{{ url('/artikel') }}">Artikel</a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </li>
+                    <li>{{ $category->name }}</li>
                 </ul>
             </div>
         </div>
@@ -30,7 +36,10 @@
             <!-- Main Content -->
             <div class="col-lg-8">
                 <div class="mb-4">
-                    <h4>Semua Artikel</h4>
+                    <h4>Artikel dalam kategori: <strong>{{ $category->name }}</strong></h4>
+                    @if($category->description)
+                    <p class="text-muted">{{ $category->description }}</p>
+                    @endif
                     <p class="text-muted">Ditemukan {{ $articles->total() }} artikel</p>
                 </div>
 
@@ -82,6 +91,19 @@
                                 <p>
                                     {{ Str::limit($article->excerpt ?? strip_tags($article->content), 120) }}
                                 </p>
+                                
+                                @if($article->tags->count() > 0)
+                                <div class="mb-2">
+                                    @foreach($article->tags->take(3) as $tag)
+                                    <a href="{{ url('artikel/tag/' . $tag->slug) }}" 
+                                       class="badge badge-light mr-1" 
+                                       style="font-size: 11px;">
+                                        #{{ $tag->name }}
+                                    </a>
+                                    @endforeach
+                                </div>
+                                @endif
+                                
                                 <a href="{{ url('artikel/' . $article->slug) }}" class="link-btn">
                                     Baca Selengkapnya <i class="fa-solid fa-arrow-right-long"></i>
                                 </a>
@@ -92,7 +114,7 @@
                     <div class="col-12">
                         <div class="alert alert-warning text-center">
                             <i class="fas fa-exclamation-circle"></i> 
-                            Belum ada artikel tersedia.
+                            Belum ada artikel dalam kategori ini.
                         </div>
                     </div>
                     @endforelse
@@ -108,20 +130,31 @@
 
             <!-- Sidebar -->
             <div class="col-lg-4">
-                <!-- Categories -->
-                @if($categories->count() > 0)
+                <!-- Back Button -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Kategori</h5>
+                        <a href="{{ url('/artikel') }}" class="btn btn-secondary btn-block">
+                            <i class="fas fa-arrow-left"></i> Semua Artikel
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Other Categories -->
+                @if($categories->count() > 1)
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Kategori Lainnya</h5>
                         <ul class="list-unstyled">
                             @foreach($categories as $cat)
-                            <li class="mb-2">
-                                <a href="{{ url('artikel/kategori/' . $cat->slug) }}" 
-                                   class="d-flex justify-content-between">
-                                    <span>{{ $cat->name }}</span>
-                                    <span class="badge badge-secondary">{{ $cat->articles_count }}</span>
-                                </a>
-                            </li>
+                                @if($cat->id != $category->id)
+                                <li class="mb-2">
+                                    <a href="{{ url('artikel/kategori/' . $cat->slug) }}" 
+                                       class="d-flex justify-content-between">
+                                        <span>{{ $cat->name }}</span>
+                                        <span class="badge badge-secondary">{{ $cat->articles_count }}</span>
+                                    </a>
+                                </li>
+                                @endif
                             @endforeach
                         </ul>
                     </div>
@@ -130,7 +163,7 @@
 
                 <!-- Tags -->
                 @if($tags->count() > 0)
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Tag Populer</h5>
                         <div>
@@ -142,28 +175,6 @@
                             </a>
                             @endforeach
                         </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Recent Articles -->
-                @if(isset($recentArticles) && $recentArticles->count() > 0)
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">Artikel Terbaru</h5>
-                        @foreach($recentArticles as $recent)
-                        <div class="mb-3 pb-3 border-bottom">
-                            <h6>
-                                <a href="{{ url('artikel/' . $recent->slug) }}">
-                                    {{ Str::limit($recent->title, 50) }}
-                                </a>
-                            </h6>
-                            <small class="text-muted">
-                                <i class="fa-solid fa-calendar-days"></i>
-                                {{ $recent->created_at->format('d M Y') }}
-                            </small>
-                        </div>
-                        @endforeach
                     </div>
                 </div>
                 @endif

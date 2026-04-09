@@ -12,7 +12,7 @@ class ArticleCategoryController extends Controller
     // Tampilkan halaman index
     public function index()
     {
-        return view('admin.manage-master.article-category.index');
+        return view('admin.manage_master.article-category.index')->with('sb', 'ArticleCategory');
     }
 
     // Get all categories

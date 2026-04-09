@@ -12,7 +12,7 @@ class TagController extends Controller
     // Tampilkan halaman index
     public function index()
     {
-        return view('admin.manage-master.tag.index');
+        return view('admin.manage_master.tag.index')->with('sb', 'Tag');
     }
 
     // Get all tags

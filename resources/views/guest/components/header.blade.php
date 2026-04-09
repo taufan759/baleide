@@ -112,15 +112,7 @@
                                                 <a href="{{ url('/ebook') }}">E-Book</a>
                                             </li>
                                             <li>
-                                                <a href="javascript:void(0)">
-                                                    Category
-                                                    <i class="fas fa-angle-down"></i>
-                                                </a>
-                                                <ul class="submenu">
-                                                    @foreach($categories as $category)
-                                                        <li><a href="{{ url('/category/' . $category->slug) }}">{{ $category->name }}</a></li>
-                                                    @endforeach
-                                                </ul>
+                                                <a href="{{ url('/artikel') }}">Artikel</a>
                                             </li>
                                             <li>
                                                 <a href="{{ url('/contact') }}">Contact</a>
@@ -177,15 +169,7 @@
                                                 <a href="{{ url('/ebook') }}">E-Book</a>
                                             </li>
                                             <li>
-                                                <a href="javascript:void(0)">
-                                                    Category
-                                                    <i class="fas fa-angle-down"></i>
-                                                </a>
-                                                <ul class="submenu">
-                                                    @foreach($categories as $category)
-                                                        <li><a href="{{ url('/category/' . $category->slug) }}">{{ $category->name }}</a></li>
-                                                    @endforeach
-                                                </ul>
+                                                <a href="{{ url('/artikel') }}">Artikel</a>
                                             </li>
                                             <li>
                                                 <a href="{{ url('/contact') }}">Contact</a>

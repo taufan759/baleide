@@ -7,6 +7,7 @@ use Midtrans\Config;
 use App\Models\Ebook;
 use App\Models\Voucher;
 use App\Models\Category;
+use App\Models\Article;
 use Midtrans\Notification;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -36,7 +37,12 @@ class GuestController extends Controller
             ->take(6)
             ->get();
 
-        return view('guest.home', compact('categories', 'topBooks', 'popularBooks', 'latestBooks'));
+        $latestArticles = Article::with(['categories', 'tags'])
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();   
+
+        return view('guest.home', compact('categories', 'topBooks', 'popularBooks', 'latestBooks', 'latestArticles'));
     }
 
     /**

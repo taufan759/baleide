@@ -1,57 +1,96 @@
-@extends('layouts.admin')
-
-@section('title', 'Kelola Tag Artikel')
+@extends('master')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Kelola Tag Artikel</h4>
-                    <button class="btn btn-primary" id="btnTambah">
-                        <i class="fas fa-plus"></i> Tambah Tag
-                    </button>
-                </div>
-                <div class="card-body">
-                    <table id="tableTag" class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Tag</th>
-                                <th>Slug</th>
-                                <th>Jumlah Artikel</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+<div class="main-content">
+    <section class="section">
+        <div class="section-header">
+            <h1>Manajemen Tag Artikel</h1>
+        </div>
+        <div class="section-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Daftar Tag Artikel</h4>
+                            <div class="card-header-action">
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambah">
+                                    <i class="fas fa-plus"></i> Tambah Tag
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="tableTag">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">No</th>
+                                            <th width="35%">Nama Tag</th>
+                                            <th width="35%">Slug</th>
+                                            <th width="15%">Jumlah Artikel</th>
+                                            <th width="10%">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal Tambah -->
+<div class="modal fade" id="modalTambah" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Tag Artikel</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="formTambah">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nama Tag <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" required>
+                        <small class="text-muted">Slug akan dibuat otomatis dari nama</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Form -->
-<div class="modal fade" id="modalForm" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Modal Edit -->
+<div class="modal fade" id="modalEdit" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form id="formTag">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Tag Artikel</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="formEdit">
                 @csrf
-                <input type="hidden" name="id" id="tagId">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Tambah Tag</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+                <input type="hidden" name="id" id="edit_id">
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Tag <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="name" id="name" required>
+                    <div class="form-group">
+                        <label>Nama Tag <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
         </div>
@@ -62,69 +101,123 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    let table = $('#tableTag').DataTable({
-        ajax: {
-            url: '{{ url("admin/manage-master/tag/all") }}',
-            dataSrc: 'data'
-        },
-        columns: [
-            { data: null, render: (data, type, row, meta) => meta.row + 1 },
-            { data: 'name' },
-            { data: 'slug' },
-            { data: 'articles_count' },
-            {
-                data: null,
-                render: (data) => `
-                    <button class="btn btn-sm btn-warning btn-edit" data-id="${data.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-delete" data-id="${data.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `
-            }
-        ]
-    });
-    
-    $('#btnTambah').click(function() {
-        $('#formTag')[0].reset();
-        $('#tagId').val('');
-        $('#modalTitle').text('Tambah Tag');
-        $('#modalForm').modal('show');
-    });
-    
-    $(document).on('click', '.btn-edit', function() {
-        const id = $(this).data('id');
-        $.post('{{ url("admin/manage-master/tag/get") }}', { id }, function(res) {
-            $('#tagId').val(res.id);
-            $('#name').val(res.name);
-            $('#modalTitle').text('Edit Tag');
-            $('#modalForm').modal('show');
+    loadData();
+
+    function loadData() {
+        $.get('{{ url("admin/manage-master/tag/all") }}', function(response) {
+            let html = '';
+            response.data.forEach((item, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td><code>${item.slug}</code></td>
+                        <td><span class="badge badge-info">${item.articles_count} artikel</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning edit" data-id="${item.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger hapus" data-id="${item.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#tableTag tbody').html(html);
         });
-    });
-    
-    $('#formTag').submit(function(e) {
+    }
+
+    $('#formTambah').on('submit', function(e) {
         e.preventDefault();
-        const url = $('#tagId').val() 
-            ? '{{ url("admin/manage-master/tag/update") }}'
-            : '{{ url("admin/manage-master/tag") }}';
-        
-        $.post(url, $(this).serialize(), function(res) {
-            alert(res.message);
-            $('#modalForm').modal('hide');
-            table.ajax.reload();
+        $.post('{{ url("admin/manage-master/tag") }}', $(this).serialize(), function(response) {
+            $('#modalTambah').modal('hide');
+            $('#formTambah')[0].reset();
+            loadData();
+            iziToast.success({
+                title: 'Berhasil',
+                message: response.message,
+                position: 'topRight'
+            });
+        }).fail(function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            for (let key in errors) {
+                iziToast.error({
+                    title: 'Error',
+                    message: errors[key][0],
+                    position: 'topRight'
+                });
+            }
         });
     });
-    
-    $(document).on('click', '.btn-delete', function() {
-        if (!confirm('Yakin ingin menghapus tag ini?')) return;
-        $.ajax({
-            url: '{{ url("admin/manage-master/tag") }}',
-            type: 'DELETE',
-            data: { id: $(this).data('id') },
-            success: function(res) {
-                alert(res.message);
-                table.ajax.reload();
+
+    $('body').on('click', '.edit', function() {
+        let id = $(this).data('id');
+        $.post('{{ url("admin/manage-master/tag/get") }}', {
+            _token: '{{ csrf_token() }}',
+            id: id
+        }, function(data) {
+            $('#edit_id').val(data.id);
+            $('#edit_name').val(data.name);
+            $('#modalEdit').modal('show');
+        });
+    });
+
+    $('#formEdit').on('submit', function(e) {
+        e.preventDefault();
+        $.post('{{ url("admin/manage-master/tag/update") }}', $(this).serialize(), function(response) {
+            $('#modalEdit').modal('hide');
+            loadData();
+            iziToast.success({
+                title: 'Berhasil',
+                message: response.message,
+                position: 'topRight'
+            });
+        }).fail(function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            for (let key in errors) {
+                iziToast.error({
+                    title: 'Error',
+                    message: errors[key][0],
+                    position: 'topRight'
+                });
+            }
+        });
+    });
+
+    $('body').on('click', '.hapus', function() {
+        let id = $(this).data('id');
+        swal({
+            title: 'Konfirmasi',
+            text: 'Yakin ingin menghapus tag ini?',
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true,
+        }).then((willDelete) => {
+            if (willDelete) {
+                $.ajax({
+                    url: '{{ url("admin/manage-master/tag") }}',
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: id
+                    },
+                    success: function(response) {
+                        loadData();
+                        iziToast.success({
+                            title: 'Berhasil',
+                            message: response.message,
+                            position: 'topRight'
+                        });
+                    },
+                    error: function(xhr) {
+                        iziToast.error({
+                            title: 'Error',
+                            message: xhr.responseJSON.message,
+                            position: 'topRight'
+                        });
+                    }
+                });
             }
         });
     });
