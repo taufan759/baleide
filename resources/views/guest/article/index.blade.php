@@ -135,12 +135,35 @@
                         <h5 class="card-title mb-3">Tag Populer</h5>
                         <div>
                             @foreach($tags->take(15) as $tag)
-                            <a href="{{ url('artikel/tag/' . $tag->slug) }}" 
-                               class="badge badge-light mb-2 mr-1" 
-                               style="font-size: 13px; padding: 8px 12px;">
-                                {{ $tag->name }} ({{ $tag->articles_count }})
-                            </a>
-                            @endforeach
+<a href="{{ url('artikel/tag/' . $tag->slug) }}" 
+   class="tag-badge-item">
+    {{ $tag->name }} ({{ $tag->articles_count }})
+</a>
+@endforeach
+
+<style>
+.tag-badge-item {
+    display: inline-block;
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 6px 12px;
+    margin: 0 6px 6px 0;
+    border-radius: 15px;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 100;
+    position: relative;
+}
+
+.tag-badge-item:hover {
+    background-color: #0056b3;
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+</style>
                         </div>
                     </div>
                 </div>
