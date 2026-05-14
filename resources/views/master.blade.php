@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="notranslate">
+<html lang="id" class="notranslate">
 
 <head>
     @include('meta')

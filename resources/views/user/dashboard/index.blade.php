@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Dashboard User - Baleide')
+@section('title', 'Dashboard - Baleide')
 
 @section('content')
     <div class="main-content">
@@ -14,6 +14,7 @@
             </div>
 
             <div class="section-body">
+                {{-- Kartu Statistik --}}
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                         <div class="card card-statistic-1">
@@ -30,7 +31,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                         <div class="card card-statistic-1">
                             <div class="card-icon bg-info">
@@ -38,7 +39,7 @@
                             </div>
                             <div class="card-wrap">
                                 <div class="card-header">
-                                    <h4>Total Ebook</h4>
+                                    <h4>Total Ebook Tersedia</h4>
                                 </div>
                                 <div class="card-body">
                                     {{ $ebookCount }}
@@ -64,6 +65,21 @@
                     </div>
                 </div>
 
+                {{-- Grafik Pengeluaran --}}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Riwayat Pengeluaran 6 Bulan Terakhir</h4>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="spendingChart" height="80"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Koleksi & Ebook Terbaru --}}
                 <div class="row">
                     <div class="col-lg-8 col-md-12">
                         <div class="card">
@@ -137,7 +153,50 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const spendingLabels = {!! $spendingLabels !!};
+    const spendingData   = {!! $spendingData !!};
+
+    new Chart(document.getElementById('spendingChart'), {
+        type: 'bar',
+        data: {
+            labels: spendingLabels,
+            datasets: [{
+                label: 'Pengeluaran (Rp)',
+                data: spendingData,
+                backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 1,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => 'Rp ' + ctx.parsed.y.toLocaleString('id-ID')
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: val => 'Rp ' + val.toLocaleString('id-ID')
+                    }
+                }
+            }
+        }
+    });
+</script>
+@endpush

@@ -236,6 +236,16 @@ class GuestController extends Controller
                 'first_name' => auth()->user()->name,
                 'email' => auth()->user()->email,
             ],
+            'enabled_payments' => [
+                'credit_card',
+                'bca_va', 'bni_va', 'bri_va', 'permata_va', 'other_va',
+                'gopay', 'shopeepay', 'dana', 'ovo',
+                'indomaret', 'alfamart',
+            ],
+            'credit_card' => [
+                'secure' => true,
+                'save_card' => false,
+            ],
         ];
 
         try {
@@ -372,6 +382,16 @@ class GuestController extends Controller
             'customer_details' => [
                 'first_name' => auth()->user()->name,
                 'email' => auth()->user()->email,
+            ],
+            'enabled_payments' => [
+                'credit_card',
+                'bca_va', 'bni_va', 'bri_va', 'permata_va', 'other_va',
+                'gopay', 'shopeepay', 'dana', 'ovo',
+                'indomaret', 'alfamart',
+            ],
+            'credit_card' => [
+                'secure' => true,
+                'save_card' => false,
             ],
         ];
 

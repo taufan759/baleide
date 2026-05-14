@@ -85,6 +85,7 @@
             var table = $('#transaction-table').DataTable({
                 processing: true,
                 serverSide: true,
+                responsive: true,
                 ajax: {
                     url: "{{ url('admin/transactions/all') }}",
                     data: function(d) {

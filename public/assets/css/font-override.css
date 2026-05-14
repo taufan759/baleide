@@ -1,0 +1,60 @@
+/*
+ * Font Override - Baleide
+ * Maksimal 3 jenis font:
+ * 1. Inter       - font utama body & UI (guest/landing)
+ * 2. Nunito      - font admin & dashboard panel
+ * 3. Moon Dance  - font dekoratif/aksen (judul hero)
+ *
+ * Semua font lain di-override ke Inter atau Nunito
+ */
+
+/* Import font yang dipakai */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Moon+Dance&display=swap");
+
+/* ===== GUEST / LANDING PAGE ===== */
+body,
+p,
+span,
+a,
+li,
+td,
+th,
+label,
+input,
+textarea,
+select,
+button,
+.navbar,
+.footer-section,
+.card,
+.breadcrumb-wrapper,
+.news-content,
+.shop-content,
+.hero-content p,
+.feature-box-items .content p,
+.offcanvas__info {
+    font-family: "Inter", sans-serif !important;
+}
+
+/* Judul hero dekoratif tetap pakai Moon Dance */
+.hero-content h6 {
+    font-family: "Moon Dance", cursive !important;
+}
+
+/* ===== ADMIN & USER DASHBOARD ===== */
+.main-wrapper,
+.main-sidebar,
+.navbar.main-navbar,
+.section-header h1,
+.card-header h4,
+.card-body,
+.sidebar-menu,
+.table,
+.form-control,
+.btn,
+.breadcrumb-item {
+    font-family: "Nunito", "Segoe UI", sans-serif !important;
+}
+
+/* Hapus font Onest yang tidak termasuk 3 font utama */
+/* (Onest dipakai di custom.css, di-override di sini) */

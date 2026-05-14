@@ -75,7 +75,7 @@
                 <h1>Katalog Ebook</h1>
                 <div class="page-header">
                     <ul class="breadcrumb-items">
-                        <li><a href="{{ url('/') }}">Home</a></li>
+                        <li><a href="{{ url('/') }}">Beranda</a></li>
                         <li><i class="fa-solid fa-chevron-right"></i></li>
                         <li>Ebook</li>
                     </ul>
@@ -114,7 +114,7 @@
                             
                             <div class="btn-flex">
                                 <a href="{{ url('ebook/' . $book->slug) }}" class="theme-btn-2">
-                                    Read More <i class="fa-regular fa-arrow-right-long"></i>
+                                    Selengkapnya <i class="fa-regular fa-arrow-right-long"></i>
                                 </a>
                                 <a href="javascript:void(0)" onclick="addToCart('{{ $book->id }}', '{{ $book->title }}')" class="theme-btn">
                                     <i class="fa-solid fa-basket-shopping"></i>

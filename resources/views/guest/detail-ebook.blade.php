@@ -84,7 +84,7 @@
 
                                 <a href="javascript:void(0)" class="theme-btn"
                                     onclick="addToCart('{{ $book->id }}', '{{ $book->title }}')">
-                                    <i class="fa-solid fa-basket-shopping"></i> Add To Cart
+                                    <i class="fa-solid fa-basket-shopping"></i> Tambah Keranjang
                                 </a>
                             </div>
 
@@ -92,15 +92,15 @@
                                 <div class="category-list">
                                     <ul>
                                         <li><span>SKU:</span> {{ $book->isbn ?? '-' }}</li>
-                                        <li><span>Category:</span> {{ $book->category->name }}</li>
+                                        <li><span>Kategori:</span> {{ $book->category->name }}</li>
                                     </ul>
                                     <ul>
                                         <li><span>Format:</span> {{ strtoupper($book->file_format) }}</li>
-                                        <li><span>Total page:</span> {{ $book->total_pages }}</li>
+                                        <li><span>Total Halaman:</span> {{ $book->total_pages }}</li>
                                     </ul>
                                     <ul>
-                                        <li><span>Publisher:</span> Baleide</li>
-                                        <li><span>Publish Years:</span> {{ $book->created_at->format('Y') }}</li>
+                                        <li><span>Penerbit:</span> Baleide</li>
+                                        <li><span>Tahun Terbit:</span> {{ $book->created_at->format('Y') }}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -112,12 +112,12 @@
                     <ul class="nav mb-5" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a href="#description" data-bs-toggle="tab" class="nav-link ps-0 active" role="tab">
-                                <h6>Description</h6>
+                                <h6>Deskripsi</h6>
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a href="#additional" data-bs-toggle="tab" class="nav-link" role="tab">
-                                <h6>Additional Information</h6>
+                                <h6>Informasi Tambahan</h6>
                             </a>
                         </li>
                     </ul>
@@ -132,15 +132,15 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <td>Availability</td>
-                                            <td>{{ $book->stock > 0 ? 'Available' : 'Out of Stock' }}</td>
+                                            <td>Ketersediaan</td>
+                                            <td>{{ $book->stock > 0 ? 'Tersedia' : 'Habis' }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Author</td>
+                                            <td>Penulis</td>
                                             <td>{{ $book->author }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Total Page</td>
+                                            <td>Jumlah Halaman</td>
                                             <td>{{ $book->total_pages }}</td>
                                         </tr>
                                     </tbody>

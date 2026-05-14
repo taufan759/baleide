@@ -36,9 +36,9 @@
                                         <i class="fa-solid fa-phone"></i>
                                     </div>
                                     <div class="content">
-                                        <p>Email & Phone</p>
+                                        <p>Email & Telepon</p>
                                         <h3>
-                                            <a href="mailto:admin@baleide.id">admin@baleide.id</a>
+                                            <a href="tel:+6289653600997">+62 896-5360-0997</a>
                                         </h3>
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                                         <i class="fa-solid fa-envelope"></i>
                                     </div>
                                     <div class="content">
-                                        <p>Mail Support</p>
+                                        <p>Dukungan Email</p>
                                         <h3>
                                             <a href="mailto:mail@baleide.com">mail@baleide.com</a>
                                         </h3>

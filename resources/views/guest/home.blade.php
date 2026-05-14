@@ -150,7 +150,7 @@
         <div class="container">
             <div class="book-catagories-wrapper">
                 <div class="section-title text-center">
-                    <h2 class="wow fadeInUp" data-wow-delay=".3s">Top Categories Book</h2>
+                    <h2 class="wow fadeInUp" data-wow-delay=".3s">Kategori Populer</h2>
                 </div>
                 <div class="array-button">
                     <button class="array-prev"><i class="fal fa-arrow-left"></i></button>
@@ -221,7 +221,7 @@
                                 <span class="mt-10">Rp {{ number_format($book->price, 0, ',', '.') }}</span>
                                 <div class="shop-btn">
                                     <a href="javascript:void(0)" onclick="addToCart('{{ $book->id }}', '{{ $book->title }}')" class="theme-btn">
-                                        <i class="fa-solid fa-basket-shopping"></i> Add To Cart
+                                        <i class="fa-solid fa-basket-shopping"></i> Tambah ke Keranjang
                                     </a>
                                 </div>
                             </div>

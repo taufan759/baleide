@@ -88,7 +88,10 @@ class EbookController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return response()->json([
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $slug = Str::slug($request->title);
@@ -99,6 +102,10 @@ class EbookController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = time() . '_file_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            // Pastikan folder ada
+            if (!file_exists(public_path('assets/ebook_files'))) {
+                mkdir(public_path('assets/ebook_files'), 0755, true);
+            }
             $file->move(public_path('assets/ebook_files'), $filename);
             $filePath = 'assets/ebook_files/' . $filename;
         }
@@ -114,10 +121,14 @@ class EbookController extends Controller
             'stock' => $request->stock,
             'total_pages' => $request->total_pages,
             'file_format' => $request->file_format,
-            'file' => $filePath, 
+            'file' => $filePath,
         ]);
 
         if ($request->hasFile('photos')) {
+            // Pastikan folder ada
+            if (!file_exists(public_path('assets/ebook'))) {
+                mkdir(public_path('assets/ebook'), 0755, true);
+            }
             foreach ($request->file('photos') as $file) {
                 $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
                 $path = 'assets/ebook/' . $filename;
@@ -150,7 +161,10 @@ class EbookController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return response()->json([
+                'message' => 'Validasi gagal.',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         if ($request->hasFile('file')) {

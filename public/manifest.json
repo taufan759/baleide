@@ -1,0 +1,51 @@
+{
+    "name": "Baleide - Platform E-Book Digital",
+    "short_name": "Baleide",
+    "description": "Platform e-book digital terpercaya untuk akses buku digital berkualitas kapan saja dan di mana saja.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#036280",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "id",
+    "icons": [
+        {
+            "src": "/assets/img/logo-black.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/img/logo-black.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/assets/img/banner-1.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "categories": ["education", "books"],
+    "shortcuts": [
+        {
+            "name": "Katalog Ebook",
+            "short_name": "Ebook",
+            "description": "Lihat semua koleksi ebook",
+            "url": "/ebook",
+            "icons": [{ "src": "/assets/img/logo-black.png", "sizes": "96x96" }]
+        },
+        {
+            "name": "Keranjang",
+            "short_name": "Keranjang",
+            "description": "Lihat keranjang belanja",
+            "url": "/cart",
+            "icons": [{ "src": "/assets/img/logo-black.png", "sizes": "96x96" }]
+        }
+    ]
+}

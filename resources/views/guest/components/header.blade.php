@@ -45,7 +45,18 @@
                             Hubungi Kami <i class="fa-solid fa-arrow-right-long"></i>
                         </a>
                     </div>
-                   
+
+                    <div class="header-button mt-3">
+                        @auth
+                            <a href="{{ url('/dashboard') }}" class="theme-btn text-center" style="background-color: #012E4A;">
+                                <i class="fa-solid fa-gauge"></i> Dashboard Saya
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="theme-btn text-center" style="background-color: #012E4A;">
+                                <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                            </a>
+                        @endauth
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,7 +70,7 @@
             <ul class="contact-list">
                 <li>
                     <i class="fa-regular fa-phone"></i>
-                    <a href="tel:+6281329995238">+62 813-2999-5238</a>
+                    <a href="tel:+6289653600997">+62 896-5360-0997</a>
                 </li>
                 <li>
                     <i class="far fa-envelope"></i>
@@ -80,7 +91,7 @@
                 @else
                     <li><i class="fa-light fa-user"></i>
                         <a href="{{ route('login') }}">
-                            Login
+                            Masuk
                         </a>
                     </li>
                 @endauth
@@ -106,7 +117,7 @@
                                     <nav>
                                         <ul>
                                             <li>
-                                                <a href="{{ url('/') }}">Home</a>
+                                                <a href="{{ url('/') }}">Beranda</a>
                                             </li>
                                             <li>
                                                 <a href="{{ url('/ebook') }}">E-Book</a>
@@ -115,7 +126,7 @@
                                                 <a href="{{ url('/artikel') }}">Artikel</a>
                                             </li>
                                             <li>
-                                                <a href="{{ url('/contact') }}">Contact</a>
+                                                <a href="{{ url('/contact') }}">Kontak</a>
                                             </li>
                                         </ul>
                                     </nav>
@@ -163,7 +174,7 @@
                                     <nav id="mobile-menu">
                                         <ul>
                                             <li>
-                                                <a href="{{ url('/') }}">Home</a>
+                                                <a href="{{ url('/') }}">Beranda</a>
                                             </li>
                                             <li>
                                                 <a href="{{ url('/ebook') }}">E-Book</a>
@@ -172,7 +183,7 @@
                                                 <a href="{{ url('/artikel') }}">Artikel</a>
                                             </li>
                                             <li>
-                                                <a href="{{ url('/contact') }}">Contact</a>
+                                                <a href="{{ url('/contact') }}">Kontak</a>
                                             </li>
                                         </ul>
                                     </nav>
