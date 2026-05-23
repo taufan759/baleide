@@ -21,8 +21,8 @@
 </IfModule>
 
 
-RewriteCond %{HTTP_REFERER} !^https://baleide.com/.*$      [NC]
-RewriteCond %{HTTP_REFERER} !^https://baleide.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://baleide.id/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://baleide.id      [NC]
 
 RewriteRule .*\.(jpg|jpeg|gif|png|bmp)$ - [F,NC]
 
