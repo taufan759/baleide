@@ -4,6 +4,113 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        /* PWA Install Bubble */
+        .pwa-install-bubble {
+            position: fixed;
+            bottom: 120px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 16px;
+            max-width: 320px;
+            z-index: 9997;
+            animation: slideInUp 0.3s ease-out;
+            display: none;
+        }
+
+        .pwa-install-bubble.show {
+            display: block;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pwa-install-bubble-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+        }
+
+        .pwa-install-bubble-content {
+            padding-right: 20px;
+        }
+
+        .pwa-install-bubble-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .pwa-install-bubble-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .pwa-install-bubble-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pwa-install-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pwa-install-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .pwa-install-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .pwa-install-btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .pwa-install-btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 480px) {
+            .pwa-install-bubble {
+                bottom: 100px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -357,6 +464,75 @@
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <!-- PWA Install Bubble HTML -->
+    <div class="pwa-install-bubble" id="pwaInstallBubble">
+        <button class="pwa-install-bubble-close" onclick="closePwaPrompt()">✕</button>
+        <div class="pwa-install-bubble-content">
+            <div class="pwa-install-bubble-title">
+                <i class="fas fa-download" style="margin-right: 8px; color: #667eea;"></i>
+                Instal Aplikasi
+            </div>
+            <div class="pwa-install-bubble-text">
+                Akses Baleide lebih cepat langsung dari layar utama perangkat kamu!
+            </div>
+            <div class="pwa-install-bubble-buttons">
+                <button class="pwa-install-btn pwa-install-btn-secondary" onclick="closePwaPrompt()">Nanti</button>
+                <button class="pwa-install-btn pwa-install-btn-primary" id="pwaInstallBtnBubble">
+                    <i class="fas fa-plus"></i> Instal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt = null;
+        const pwaBubble = document.getElementById('pwaInstallBubble');
+        const pwaInstallBtn = document.getElementById('pwaInstallBtnBubble');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Check localStorage untuk skip
+            const hasSkipped = localStorage.getItem('pwaInstallSkipped');
+            const skipTime = localStorage.getItem('pwaInstallSkipTime');
+            const now = Date.now();
+            
+            // Show bubble jika belum skip atau sudah 7 hari
+            if (!hasSkipped || (skipTime && now - parseInt(skipTime) > 7 * 24 * 60 * 60 * 1000)) {
+                setTimeout(() => {
+                    pwaBubble.classList.add('show');
+                }, 3000);
+            }
+        });
+
+        pwaInstallBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    localStorage.removeItem('pwaInstallSkipped');
+                    localStorage.removeItem('pwaInstallSkipTime');
+                }
+                
+                deferredPrompt = null;
+                pwaBubble.classList.remove('show');
+            }
+        });
+
+        function closePwaPrompt() {
+            pwaBubble.classList.remove('show');
+            localStorage.setItem('pwaInstallSkipped', 'true');
+            localStorage.setItem('pwaInstallSkipTime', Date.now().toString());
+        }
+
+        window.addEventListener('appinstalled', () => {
+            pwaBubble.classList.remove('show');
+        });
+    </script>
+    
     <script>
         toastr.options = {
             "closeButton": true,
