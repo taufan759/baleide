@@ -489,8 +489,13 @@
         let deferredPrompt = null;
         const pwaBubble = document.getElementById('pwaInstallBubble');
         const pwaInstallBtn = document.getElementById('pwaInstallBtnBubble');
+        
+        // Only show PWA prompt on production (HTTPS)
+        const isProduction = window.location.protocol === 'https:';
 
         window.addEventListener('beforeinstallprompt', (e) => {
+            if (!isProduction) return; // Skip on localhost
+            
             e.preventDefault();
             deferredPrompt = e;
             
