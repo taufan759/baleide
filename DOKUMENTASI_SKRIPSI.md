@@ -548,3 +548,299 @@ User bisa akses ebook
 | NF-04 | Kemudahan Penggunaan | Antarmuka intuitif, tidak perlu pelatihan khusus    |
 | NF-05 | Skalabilitas         | Dapat menangani penambahan data ebook dan user      |
 | NF-06 | Kompatibilitas       | Berjalan di browser modern (Chrome, Firefox, Opera) |
+
+---
+
+## 11. DEPLOYMENT & HOSTING (CPANEL)
+
+### Informasi Hosting
+
+| Item             | Detail                       |
+| ---------------- | ---------------------------- |
+| Hosting Provider | cPanel Control Panel         |
+| Server Location  | /home/baleidem/public_html   |
+| Application Root | /home/baleidem/              |
+| Domain           | baleide.id                   |
+| PHP Version      | 8.2 (via MultiPHP)           |
+| Database         | MySQL 8.x                    |
+| SSL              | Let's Encrypt (Auto-renewed) |
+
+### Struktur Folder di Server
+
+```
+/home/baleidem/
+├── public_html/              # Folder publik (DocumentRoot)
+│   ├── index.php             # Entry point Laravel
+│   ├── .htaccess             # URL rewriting rules
+│   ├── assets/               # CSS, JS, images (symlink)
+│   ├── storage/              # Symlink ke storage/app/public
+│   └── ...
+├── app/                      # Kode aplikasi
+├── resources/                # Views & asset sources
+├── config/                   # Konfigurasi
+├── database/                 # Migrations & seeders
+├── routes/                   # Route definitions
+├── storage/                  # User uploads & logs
+├── vendor/                   # Composer dependencies
+├── .env                      # Environment variables (JANGAN COMMIT)
+├── artisan                   # Laravel CLI
+├── composer.json             # Dependencies list
+├── composer.lock             # Locked versions
+└── .git/                     # Git repository
+
+www/ → symlink ke public_html/
+```
+
+### Setup Awal di cPanel
+
+#### 1. Setup Git Repository
+
+```bash
+cd /home/baleidem
+git clone https://github.com/taufan759/baleide.git .
+git fetch origin main
+git checkout main
+```
+
+#### 2. Install Dependencies
+
+```bash
+cd /home/baleidem
+composer install --optimize-autoloader --no-dev
+```
+
+#### 3. Setup Environment File
+
+```bash
+cp .env.example .env
+# Edit .env dan sesuaikan dengan konfigurasi server:
+# - APP_KEY (generate dengan: php artisan key:generate)
+# - DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD
+# - MAIL_* untuk notifikasi
+# - Midtrans credentials
+```
+
+#### 4. Setup Database
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+#### 5. Setup Storage Symlink
+
+```bash
+php artisan storage:link
+# Ini akan membuat symlink dari storage/app/public → public/storage
+```
+
+#### 6. Set File Permissions
+
+```bash
+chmod -R 755 /home/baleidem/storage
+chmod -R 755 /home/baleidem/bootstrap/cache
+```
+
+#### 7. Setup .htaccess untuk URL Rewriting
+
+File: `/home/baleidem/public_html/.htaccess`
+
+```apache
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Hotlink Protection - Allow empty referer (direct access & internal)
+RewriteEngine On
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?baleide\.id [NC]
+RewriteRule .*\.(jpg|jpeg|gif|png|bmp|webp)$ - [F,NC]
+
+# cPanel PHP Configuration
+<IfModule php8_module>
+   php_flag display_errors Off
+   php_value max_execution_time 3000
+   php_value max_input_time 6000
+   php_value max_input_vars 1000
+   php_value memory_limit 512M
+   php_value post_max_size 64M
+   php_value session.gc_maxlifetime 1440
+   php_value upload_max_filesize 64M
+   php_flag zlib.output_compression Off
+</IfModule>
+```
+
+### Update Aplikasi dari GitHub
+
+Setelah push ke GitHub, pull di server dengan:
+
+```bash
+cd /home/baleidem
+git fetch origin main
+git checkout main
+git pull origin main
+```
+
+Kemudian clear cache Laravel:
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+php artisan route:clear
+```
+
+Jika ada perubahan dependencies:
+
+```bash
+composer install --optimize-autoloader --no-dev
+```
+
+Jika ada database migration baru:
+
+```bash
+php artisan migrate
+```
+
+### Environment Configuration (.env)
+
+File `.env` pada production harus memiliki konfigurasi berikut:
+
+```env
+APP_NAME=Baleide
+APP_ENV=production
+APP_KEY=base64:XXX... (generate dengan php artisan key:generate)
+APP_DEBUG=false
+APP_URL=https://baleide.id
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=baleide_db
+DB_USERNAME=baleide_user
+DB_PASSWORD=strong_password
+
+# Mail
+MAIL_MAILER=smtp
+MAIL_HOST=mail.baleide.id
+MAIL_PORT=465
+MAIL_USERNAME=noreply@baleide.id
+MAIL_PASSWORD=mail_password
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS=noreply@baleide.id
+
+# Midtrans
+MIDTRANS_SERVER_KEY=SB-Mid-server-key-xxx
+MIDTRANS_CLIENT_KEY=SB-Mid-client-key-xxx
+MIDTRANS_ENVIRONMENT=production
+
+# AI Services
+DEEPSEEK_API_KEY=sk-xxxxx
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+AI_DEFAULT_PROVIDER=deepseek
+
+OPENAI_API_KEY=sk-proj-xxxxx
+OPENAI_MODEL=gpt-4-mini
+AI_PREMIUM_PROVIDER=openai
+```
+
+### Troubleshooting
+
+#### 1. 500 Internal Server Error
+
+**Penyebab**: APP_KEY belum di-generate atau permissions tidak tepat
+
+```bash
+php artisan key:generate
+chmod -R 755 storage bootstrap/cache
+```
+
+#### 2. Gambar Tidak Muncul di Production
+
+**Fix**: Pastikan symlink sudah dibuat dan .htaccess hotlink protection sudah diset
+
+```bash
+php artisan storage:link
+# Cek file public/.htaccess sudah benar
+```
+
+#### 3. Session Hilang / Login Error
+
+**Penyebab**: Session configuration atau storage permission issue
+
+```bash
+# Opsi 1: Clear sessions
+rm -rf storage/framework/sessions/*
+
+# Opsi 2: Ganti session driver ke database
+php artisan session:table
+php artisan migrate
+
+# Di .env: SESSION_DRIVER=database
+```
+
+#### 4. Mail tidak terkirim
+
+**Debug**: Test dengan:
+
+```bash
+php artisan tinker
+Mail::raw('Test email', function ($message) {
+    $message->to('test@example.com');
+});
+```
+
+### Backup Strategy
+
+Backup database secara berkala:
+
+```bash
+# Manual backup
+mysqldump -u baleide_user -p baleide_db > /home/baleidem/backups/baleide_$(date +%Y%m%d_%H%M%S).sql
+
+# atau via cPanel Backup Wizard
+```
+
+Backup file penting:
+
+```bash
+tar -czf /home/baleidem/backups/baleide_$(date +%Y%m%d).tar.gz \
+  /home/baleidem/storage/app/public \
+  /home/baleidem/.env
+```
+
+### Monitoring & Logging
+
+Cek logs aplikasi:
+
+```bash
+tail -f storage/logs/laravel.log
+```
+
+Cek error PHP:
+
+```bash
+tail -f /var/log/apache2/domlogs/baleidem
+```
+
+Monitor server resources di cPanel Resource Usage
