@@ -57,6 +57,12 @@
                             </a>
                         @endauth
                     </div>
+                    <div class="header-button mt-3">
+                        <a href="{{ url('/cart') }}" class="theme-btn text-center" style="background-color: #E2793D;">
+                            <i class="fa-regular fa-cart-shopping"></i> Keranjang
+                            <span class="cart-badge-mobile" id="cart-count-mobile">0</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,59 +163,4 @@
     </div>
 </header>
 
-<header class="header-1">
-    <div class="mega-menu-wrapper">
-        <div class="header-main">
-            <div class="container">
-                <div class="row">
-                    <div class="col-6 col-md-6 col-lg-10 col-xl-8 col-xxl-10">
-                        <div class="header-left">
-                            <div class="logo">
-                                <a href="{{ url('/') }}" class="header-logo">
-                                    <img src="{{ asset('assets/img/logo-baleide-white.webp')}}" alt="logo-img">
-                                </a>
-                            </div>
-                            <div class="mean__menu-wrapper">
-                                <div class="main-menu">
-                                    <nav id="mobile-menu">
-                                        <ul>
-                                            <li>
-                                                <a href="{{ url('/') }}">Beranda</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ url('/ebook') }}">E-Book</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ url('/artikel') }}">Artikel</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ url('/contact') }}">Kontak</a>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-6 col-lg-2 col-xl-4 col-xxl-2">
-                        <div class="header-right">
-                            <div class="menu-cart">
-                                <a href="{{ url('/cart') }}" class="cart-icon">
-                                    <i class="fa-regular fa-cart-shopping"></i>
-                                    <span class="cart-badge" id="cart-count">0</span>
-                                </a>
-                                <div class="header-humbager ml-30">
-                                    <a class="sidebar__toggle" href="javascript:void(0)">
-                                        <div class="bar-icon-2">
-                                            <img src="{{ asset('client/assets/img/icon/icon-13.svg')}}" alt="img">
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
+{{-- header non-sticky dihapus karena duplikat dari sticky header di atas --}}

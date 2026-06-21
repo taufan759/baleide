@@ -57,6 +57,12 @@
                 </a>
             </li>
             
+            <li {{ $sb == 'Laporan' ? 'class=active' : '' }}>
+                <a class="nav-link" href="{{ route('user.reports.index') }}">
+                    <i class="fas fa-chart-line"></i> <span>Laporan</span>
+                </a>
+            </li>
+            
             <li {{ $sb == 'Profile' ? 'class=active' : '' }}>
                 <a class="nav-link" href="{{ url('dashboard/profile') }}">
                     <i class="fas fa-user-circle"></i> <span>Profil Saya</span>

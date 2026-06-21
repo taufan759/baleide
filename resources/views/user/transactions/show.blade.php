@@ -8,7 +8,7 @@
             <div class="section-header">
                 <h1>Detail Transaksi</h1>
                 <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item"><a href="{{ url('admin/transactions') }}">Data Transaksi</a></div>
+                    <div class="breadcrumb-item"><a href="{{ url('/dashboard/transactions') }}">Riwayat Pesanan</a></div>
                     <div class="breadcrumb-item">Detail</div>
                 </div>
             </div>
@@ -38,13 +38,14 @@
                     <div class="card-header">
                         <h4>Informasi Transaksi</h4>
                         <div class="card-header-action">
-                            <a href="{{ url('admin/transactions') }}" class="btn btn-primary">Kembali</a>
+                            <a href="{{ url('/dashboard/transactions') }}" class="btn btn-primary">Kembali</a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <h5>Informasi Umum</h5>
+                                <div class="table-responsive">
                                 <table class="table table-bordered">
                                     <tr>
                                         <th>ID Transaksi</th>
@@ -73,7 +74,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Total Amount</th>
+                                        <th>Total Bayar</th>
                                         <td>Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
                                     </tr>
                                     <tr>
@@ -82,33 +83,32 @@
                                     </tr>
                                     <tr>
                                         <th>Status Pembayaran</th>
-                                        <td>{{ ucfirst($transaction->payment_status) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Tipe Pengiriman</th>
-                                        <td>{{ ucfirst($transaction->delivery_type) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Deskripsi Pengiriman</th>
-                                        <td>{{ $transaction->delivery_desc ?? '-' }}</td>
+                                        <td>
+                                            @php
+                                                $statusMap = ['pending'=>'Menunggu','paid'=>'Berhasil','failed'=>'Gagal','expired'=>'Kedaluwarsa'];
+                                            @endphp
+                                            {{ $statusMap[$transaction->payment_status] ?? ucfirst($transaction->payment_status) }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Tanggal Transaksi</th>
                                         <td>{{ $transaction->created_at->format('d-m-Y H:i') }}</td>
                                     </tr>
                                     <tr>
-                                        <th>Midtrans Order ID</th>
+                                        <th>ID Order Midtrans</th>
                                         <td>{{ $transaction->midtrans_order_id ?? '-' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>Midtrans Transaction ID</th>
+                                        <th>ID Transaksi Midtrans</th>
                                         <td>{{ $transaction->midtrans_transaction_id ?? '-' }}</td>
                                     </tr>
                                 </table>
+                                </div>
                             </div>
                         </div>
 
-                        <h5 class="mt-4">Item Transaksi</h5>
+                        <h5 class="mt-4">Daftar E-Book</h5>
+                        <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -147,6 +147,7 @@
                                 </tr>
                             </tfoot>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>

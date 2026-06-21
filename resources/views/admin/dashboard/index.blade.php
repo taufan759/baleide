@@ -6,6 +6,11 @@
 <style>
     .chart-card { border-radius: 10px; }
     .chart-card .card-header { border-bottom: 1px solid #f0f0f0; }
+    .chart-wrapper { position: relative; width: 100%; }
+    @media (max-width: 576px) {
+        .chart-wrapper canvas { max-height: 220px !important; }
+        .chart-category-wrapper { max-width: 220px !important; }
+    }
 </style>
 @endpush
 
@@ -97,7 +102,9 @@
                                 <h4>Pendapatan 3 Bulan Terakhir</h4>
                             </div>
                             <div class="card-body">
-                                <canvas id="revenueChart" height="120"></canvas>
+                                <div class="chart-wrapper">
+                                    <canvas id="revenueChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -109,7 +116,9 @@
                                 <h4>Ebook per Kategori</h4>
                             </div>
                             <div class="card-body d-flex justify-content-center">
-                                <canvas id="categoryChart" height="200" style="max-width:260px;"></canvas>
+                                <div class="chart-wrapper chart-category-wrapper" style="max-width:260px; width:100%;">
+                                    <canvas id="categoryChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,7 +132,9 @@
                                 <h4>Jumlah Transaksi 3 Bulan Terakhir</h4>
                             </div>
                             <div class="card-body">
-                                <canvas id="transactionChart" height="140"></canvas>
+                                <div class="chart-wrapper">
+                                    <canvas id="transactionChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -211,6 +222,7 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -248,6 +260,7 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 y: {
@@ -274,6 +287,7 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 12 } }
             }

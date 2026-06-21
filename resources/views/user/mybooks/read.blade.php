@@ -30,16 +30,10 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            display: none; 
+            display: flex;
             flex-direction: column;
             gap: 10px;
             z-index: 100;
-        }
-
-        @media (min-width: 1024px) {
-            .zoom-controls {
-                display: flex;
-            }
         }
     </style>
 </head>
@@ -52,7 +46,7 @@
         </a>
         <h1 class="text-sm md:text-lg font-bold truncate px-4">{{ $ebook->title }}</h1>
         <div class="flex items-center gap-4">
-            <span id="zoom-percent" class="hidden lg:inline text-xs md:text-sm bg-white/20 px-3 py-1 rounded-full">100%</span>
+            <span id="zoom-percent" class="text-xs md:text-sm bg-white/20 px-3 py-1 rounded-full">100%</span>
         </div>
     </nav>
 
@@ -82,32 +76,42 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
         let pdfDoc = null;
-        let currentScale = window.innerWidth < 1024 ? 1.2 : 1.5;
+        let currentScale = window.innerWidth < 768 ? 0.9 : (window.innerWidth < 1024 ? 1.2 : 1.5);
+        let isRendering = false;
         const container = document.getElementById('pdf-container');
 
+        // Hanya render ulang halaman yang ada di viewport (lazy render)
+        async function renderPage(pageNum) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: currentScale });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.dataset.page = pageNum;
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            return canvas;
+        }
+
         async function renderPages() {
-            container.innerHTML = '';
+            if (isRendering) return;
+            isRendering = true;
+            container.innerHTML = '<div class="text-white text-center py-4">Memuat halaman...</div>';
+            const fragment = document.createDocumentFragment();
             for (let i = 1; i <= pdfDoc.numPages; i++) {
-                const page = await pdfDoc.getPage(i);
-                const viewport = page.getViewport({ scale: currentScale });
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                container.appendChild(canvas);
+                const canvas = await renderPage(i);
+                fragment.appendChild(canvas);
             }
-            if (window.innerWidth >= 1024) {
-                document.getElementById('zoom-percent').innerText = Math.round((currentScale / 1.5) * 100) + '%';
-            }
+            container.innerHTML = '';
+            container.appendChild(fragment);
+            document.getElementById('zoom-percent').innerText = Math.round((currentScale / 1.5) * 100) + '%';
+            isRendering = false;
         }
 
         async function changeZoom(delta) {
-            if (window.innerWidth < 1024) return;
+            if (isRendering) return;
             const newScale = currentScale + delta;
-            if (newScale >= 0.5 && newScale <= 3.0) {
+            if (newScale >= 0.4 && newScale <= 3.0) {
                 currentScale = newScale;
                 await renderPages();
             }
@@ -120,7 +124,7 @@
                 document.getElementById('loading-overlay').classList.add('hidden');
                 await renderPages();
             } catch (error) {
-                document.getElementById('load-status').innerText = 'Gagal memuat dokumen.';
+                document.getElementById('load-status').innerText = 'Gagal memuat dokumen. Pastikan file tersedia.';
             }
         }
 
@@ -131,6 +135,34 @@
                 e.preventDefault();
             }
         });
+
+        // Pinch-to-zoom untuk mobile
+        let initialDistance = null;
+        let initialScale = null;
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = currentScale;
+            }
+        }, { passive: true });
+        document.addEventListener('touchend', function(e) {
+            initialDistance = null;
+            initialScale = null;
+        }, { passive: true });
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2 && initialDistance) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const ratio = dist / initialDistance;
+                const newScale = Math.min(3.0, Math.max(0.4, initialScale * ratio));
+                currentScale = Math.round(newScale * 10) / 10;
+            }
+        }, { passive: true });
     </script>
 </body>
 </html>

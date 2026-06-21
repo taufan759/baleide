@@ -33,27 +33,27 @@
                         </div>
                         <ul class="list-area">
                             <li>
-                                <a href="{{ url('ebook') }}">
+                                <a href="{{ url('/ebook') }}">
                                     <i class="fa-solid fa-chevrons-right"></i>
                                     Koleksi Buku
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ url('kontak') }}">
+                                <a href="{{ url('/contact') }}">
                                     <i class="fa-solid fa-chevrons-right"></i>
                                     Hubungi Kami
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ url('profil') }}">
+                                <a href="{{ url('/dashboard/profile') }}">
                                     <i class="fa-solid fa-chevrons-right"></i>
                                     Akun Saya
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="{{ url('/contact') }}">
                                     <i class="fa-solid fa-chevrons-right"></i>
-                                    Syarat & Ketentuan
+                                    Syarat &amp; Ketentuan
                                 </a>
                             </li>
                         </ul>

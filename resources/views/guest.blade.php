@@ -66,6 +66,9 @@
 
     @include('guest.components.footer')
 
+    {{-- Floating Chatbot Widget --}}
+    @include('components.chatbot-widget')
+
     @stack('scripts')
 
     <!--<< All JS Plugins >>-->
@@ -97,11 +100,11 @@
 <script>
     function updateCartBadge() {
         const cart = JSON.parse(localStorage.getItem('ebook_cart')) || [];
-        const countElements = document.querySelectorAll('#cart-count');
+        const countElements = document.querySelectorAll('#cart-count, #cart-count-mobile');
         
         countElements.forEach(el => {
             el.innerText = cart.length;
-            el.style.display = cart.length > 0 ? 'block' : 'none';
+            el.style.display = cart.length > 0 ? 'inline-block' : 'none';
         });
     }
 

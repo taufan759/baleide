@@ -59,6 +59,10 @@ Route::get('/checkout-success', [GuestController::class, 'success'])->name('chec
 Route::get('/contact', [GuestController::class, 'contact'])->name('contact');
 Route::post('/contact', [GuestController::class, 'contactSend'])->name('contact.send');
 
+# -------------------- CHATBOT AI --------------------
+Route::get('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'index'])->name('chatbot.index');
+Route::post('/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
+
 # -------------------- ADMIN --------------------
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     # Dashboard
@@ -160,6 +164,12 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
         Route::get('/', [ProfileController::class, 'index']);
         Route::put('/update', [ProfileController::class, 'update']);
         Route::put('/password', [ProfileController::class, 'updatePassword']);
+    });
+
+    # Menu Laporan
+    Route::prefix('reports')->group(function () {
+        Route::get('/', [\App\Http\Controllers\User\ReportController::class, 'index'])->name('user.reports.index');
+        Route::get('/export-pdf', [\App\Http\Controllers\User\ReportController::class, 'exportPdf'])->name('user.reports.export');
     });
 
 });

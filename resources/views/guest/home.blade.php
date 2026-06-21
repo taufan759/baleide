@@ -88,6 +88,70 @@
         </div>
     </section>
 
+    {{-- Chatbot CTA Section --}}
+    <section class="section-padding pt-0">
+        <div class="container">
+            <div class="row align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 60px 40px; position: relative; overflow: hidden;">
+                <div class="position-absolute" style="top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                <div class="position-absolute" style="bottom: -80px; left: -80px; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                
+                <div class="col-lg-7 mb-4 mb-lg-0" style="position: relative; z-index: 2;">
+                    <div class="text-white">
+                        <h6 class="text-white mb-3 wow fadeInUp" data-wow-delay=".2s" style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9;">
+                            <i class="fas fa-robot"></i> Fitur Baru!
+                        </h6>
+                        <h2 class="text-white mb-3 wow fadeInUp" data-wow-delay=".3s" style="font-size: 36px; font-weight: 700;">
+                            Bingung Mau Baca Buku Apa?
+                        </h2>
+                        <p class="text-white mb-4 wow fadeInUp" data-wow-delay=".4s" style="font-size: 18px; opacity: 0.95; line-height: 1.6;">
+                            <strong>Halo, Chief!</strong> 👋 Biarkan Asisten AI kami bantu kamu nemuin buku yang <strong>pas dengan mood</strong> dan kebutuhan kamu hari ini.
+                        </p>
+                        <ul class="text-white mb-0 wow fadeInUp" data-wow-delay=".5s" style="list-style: none; padding: 0;">
+                            <li style="margin-bottom: 12px; font-size: 16px;">
+                                <i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>
+                                Rekomendasi personal berdasarkan mood
+                            </li>
+                            <li style="margin-bottom: 12px; font-size: 16px;">
+                                <i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>
+                                Jawaban instant dengan teknologi AI
+                            </li>
+                            <li style="margin-bottom: 12px; font-size: 16px;">
+                                <i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>
+                                100% gratis, tanpa perlu daftar
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-5 text-center wow fadeInUp" data-wow-delay=".6s" style="position: relative; z-index: 2;">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; border: 2px solid rgba(255,255,255,0.2);">
+                        <div style="font-size: 100px; margin-bottom: 20px; line-height: 1;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100" height="100">
+                                <circle cx="32" cy="32" r="30" fill="#E8E8E8"/>
+                                <rect x="20" y="24" width="8" height="8" rx="2" fill="#00D4FF"/>
+                                <rect x="36" y="24" width="8" height="8" rx="2" fill="#00D4FF"/>
+                                <rect x="26" y="40" width="12" height="3" rx="1.5" fill="#333"/>
+                                <rect x="28" y="14" width="8" height="6" rx="2" fill="#FF5252"/>
+                                <circle cx="16" cy="10" r="3" fill="#666"/>
+                                <rect x="16" y="10" width="2" height="8" fill="#666"/>
+                                <circle cx="48" cy="10" r="3" fill="#666"/>
+                                <rect x="47" y="10" width="2" height="8" fill="#666"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-white mb-3">Asisten Baleide Siap Bantu!</h4>
+                        <p class="text-white mb-4" style="opacity: 0.9;">Click tombol chat di kiri bawah atau:</p>
+                        <button onclick="toggleChatbot()" class="btn btn-light btn-lg" style="padding: 15px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transition: all 0.3s;">
+                            <i class="fas fa-comments"></i> Mulai Chat Sekarang
+                        </button>
+                        <p class="text-white mt-3 mb-0" style="font-size: 13px; opacity: 0.8;">
+                            <i class="fas fa-users"></i> Sudah membantu <strong>500+</strong> pembaca
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="shop-section section-padding fix pt-0">
         <div class="container">
             <div class="section-title-area">

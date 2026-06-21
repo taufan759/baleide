@@ -20,6 +20,15 @@ class DashboardController extends Controller
             $query->where('user_id', $user->id)->where('payment_status', 'paid');
         })->pluck('ebook_id');
 
+        // Kategori favorit user (berdasarkan pembelian)
+        $favoriteCategories = Ebook::with('category')
+            ->whereIn('id', $purchasedEbookIds)
+            ->get()
+            ->groupBy('category.name')
+            ->map(fn($items) => $items->count())
+            ->sortDesc()
+            ->take(3);
+
         // Data grafik pengeluaran 6 bulan terakhir
         $spendingLabels = [];
         $spendingData   = [];
@@ -33,10 +42,17 @@ class DashboardController extends Controller
                 ->sum('total_amount');
         }
 
+        // Total transaksi sukses
+        $totalTransactions = Transaction::where('user_id', $user->id)
+            ->where('payment_status', 'paid')
+            ->count();
+
         $data = [
             'today'          => Carbon::now()->isoFormat('dddd, D MMMM Y'),
             'myBooksCount'   => $purchasedEbookIds->count(),
             'ebookCount'     => Ebook::count(),
+            'totalTransactions' => $totalTransactions,
+            'favoriteCategories' => $favoriteCategories,
             'mySpending'     => Transaction::where('user_id', $user->id)
                                 ->where('payment_status', 'paid')
                                 ->sum('total_amount'),

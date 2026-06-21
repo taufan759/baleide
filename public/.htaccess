@@ -21,10 +21,12 @@
 </IfModule>
 
 
-RewriteCond %{HTTP_REFERER} !^https://baleide.id/.*$      [NC]
-RewriteCond %{HTTP_REFERER} !^https://baleide.id      [NC]
+RewriteEngine On
 
-RewriteRule .*\.(jpg|jpeg|gif|png|bmp)$ - [F,NC]
+# Hotlink protection — izinkan akses langsung (referer kosong) dan dari domain baleide.id
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?baleide\.id [NC]
+RewriteRule .*\.(jpg|jpeg|gif|png|bmp|webp)$ - [F,NC]
 
 # BEGIN cPanel-generated php ini directives, do not edit
 # Manual editing of this file may result in unexpected behavior.

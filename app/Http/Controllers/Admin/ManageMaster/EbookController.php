@@ -39,26 +39,25 @@ class EbookController extends Controller
                 return '<span class="text-muted">No Photo</span>';
             })
             ->addColumn('file_preview', function (Ebook $ebook) {
-                if ($ebook->file && file_exists(public_path($ebook->file))) {
+                if ($ebook->file) {
                     return '<a href="' . asset($ebook->file) . '" target="_blank" class="btn btn-info btn-sm">
                                 <i class="fas fa-file-pdf"></i> Lihat File
                             </a>';
                 }
-                return '<span class="badge badge-warning">File Missing</span>';
+                return '<span class="badge badge-warning">Belum Ada File</span>';
             })
             ->addColumn('price_display', function (Ebook $ebook) {
                 return '<strong>Rp ' . number_format($ebook->price, 0, ',', '.') . '</strong>';
             })
             ->addColumn('action', function (Ebook $ebook) {
                 return '
-                <div class="dropdown d-inline dropleft">
-                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
-                        Aksi
+                <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-warning btn-sm edit" data-id="' . $ebook->id . '">
+                        <i class="fas fa-edit"></i> Ubah
                     </button>
-                    <ul class="dropdown-menu">
-                        <li><a data-id="' . $ebook->id . '" class="dropdown-item edit" style="cursor:pointer">Edit</a></li>
-                        <li><a data-id="' . $ebook->id . '" class="dropdown-item hapus text-danger" style="cursor:pointer">Hapus</a></li>
-                    </ul>
+                    <button type="button" class="btn btn-danger btn-sm hapus" data-id="' . $ebook->id . '">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
                 </div>';
             })
             ->rawColumns(['category_name', 'photos_preview', 'file_preview', 'price_display', 'action'])
@@ -144,6 +143,19 @@ class EbookController extends Controller
         return response()->json(['message' => 'Ebook berhasil ditambahkan'], 200);
     }
 
+    /**
+     * Helper untuk hapus file di public path dengan aman
+     * (kompatibel local dan shared hosting)
+     */
+    private function deletePublicFile(?string $relativePath): void
+    {
+        if (!$relativePath) return;
+        $fullPath = public_path($relativePath);
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            @unlink($fullPath);
+        }
+    }
+
     public function update(Request $request)
     {
         $ebook = Ebook::findOrFail($request->id);
@@ -157,25 +169,27 @@ class EbookController extends Controller
             'stock' => 'required|integer|min:0',
             'total_pages' => 'nullable|integer',
             'file_format' => 'required|string',
-            'file' => 'nullable|file|mimes:pdf,epub,mobi|max:20480', 
+            'file' => 'nullable|file|mimes:pdf,epub,mobi|max:20480',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validasi gagal.',
-                'errors' => $validator->errors()
-            ], 422);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $newFilePath = $ebook->file; // default: tetap pakai file lama
         if ($request->hasFile('file')) {
-            if ($ebook->file && file_exists(public_path($ebook->file))) {
-                unlink(public_path($ebook->file));
-            }
-            
+            $this->deletePublicFile($ebook->file);
             $file = $request->file('file');
             $filename = time() . '_file_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('assets/ebook_files'), $filename);
-            $ebook->file = 'assets/ebook_files/' . $filename;
+            $destDir = public_path('assets/ebook_files');
+            if (!file_exists($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
+            $file->move($destDir, $filename);
+            $newFilePath = 'assets/ebook_files/' . $filename;
         }
 
         if ($ebook->title !== $request->title) {
@@ -187,6 +201,7 @@ class EbookController extends Controller
         $ebook->update([
             'category_id' => $request->category_id,
             'title' => $request->title,
+            'slug' => $ebook->slug,
             'author' => $request->author,
             'isbn' => $request->isbn,
             'description' => $request->description,
@@ -194,25 +209,27 @@ class EbookController extends Controller
             'stock' => $request->stock,
             'total_pages' => $request->total_pages,
             'file_format' => $request->file_format,
-            'file' => $ebook->file,
+            'file' => $newFilePath,
         ]);
 
         if ($request->filled('deleted_photos')) {
             $deletedIds = explode(',', $request->deleted_photos);
             $photos = EbookPhoto::whereIn('id', $deletedIds)->where('ebook_id', $ebook->id)->get();
             foreach ($photos as $photo) {
-                if (file_exists(public_path($photo->photo))) {
-                    unlink(public_path($photo->photo));
-                }
+                $this->deletePublicFile($photo->photo);
                 $photo->delete();
             }
         }
 
         if ($request->hasFile('photos')) {
+            $destDir = public_path('assets/ebook');
+            if (!file_exists($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
             foreach ($request->file('photos') as $file) {
                 $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
                 $path = 'assets/ebook/' . $filename;
-                $file->move(public_path('assets/ebook'), $filename);
+                $file->move($destDir, $filename);
 
                 EbookPhoto::create([
                     'ebook_id' => $ebook->id,
@@ -228,14 +245,10 @@ class EbookController extends Controller
     {
         $ebook = Ebook::with('photos')->findOrFail($request->id);
 
-        if ($ebook->file && file_exists(public_path($ebook->file))) {
-            unlink(public_path($ebook->file));
-        }
+        $this->deletePublicFile($ebook->file);
 
         foreach ($ebook->photos as $photo) {
-            if (file_exists(public_path($photo->photo))) {
-                unlink(public_path($photo->photo));
-            }
+            $this->deletePublicFile($photo->photo);
         }
 
         $ebook->delete();

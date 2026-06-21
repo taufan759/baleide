@@ -425,9 +425,10 @@
                     preview.empty();
                     if(data.photos) {
                         data.photos.forEach(p => {
+                            let photoUrl = p.photo.startsWith('http') ? p.photo : '{{ url('/') }}/' + p.photo;
                             preview.append(`
                                 <div class="position-relative mr-2 mb-2 photo-item" data-id="${p.id}">
-                                    <img src="{{ asset('') }}${p.photo}" class="img-thumbnail" style="width:80px">
+                                    <img src="${photoUrl}" class="img-thumbnail" style="width:80px">
                                     <button type="button" class="btn btn-danger btn-sm position-absolute btn-remove-photo" style="top:-5px;right:-5px;padding:0 5px">×</button>
                                 </div>
                             `);
