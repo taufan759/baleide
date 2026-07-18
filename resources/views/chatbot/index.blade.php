@@ -226,7 +226,7 @@
                                     <i class="fas fa-robot"></i>
                                 </div>
                                 <div class="message-bubble">
-                                    <p class="mb-0">👋 Hai! Saya <strong>Baleide Assistant</strong>, asisten AI yang siap membantu kamu menemukan e-book yang tepat!</p>
+                                    <p class="mb-0">Hai! Saya <strong>Baleide Assistant</strong>, asisten AI yang siap membantu kamu menemukan e-book yang tepat.</p>
                                     <p class="mb-0 mt-2">Ceritakan mood atau kebutuhan baca kamu hari ini. Misalnya:</p>
                                     <ul class="mb-0 mt-2">
                                         <li>"Aku lagi butuh buku santai buat weekend"</li>
@@ -240,19 +240,19 @@
                         <div class="px-3">
                             <div class="quick-prompts">
                                 <button class="quick-prompt-btn" onclick="sendQuickPrompt('Rekomendasikan buku santai untuk weekend')">
-                                    📚 Buku Santai
+                                    Buku Santai
                                 </button>
                                 <button class="quick-prompt-btn" onclick="sendQuickPrompt('Buku teknologi atau programming')">
-                                    💻 Teknologi
+                                    Teknologi
                                 </button>
                                 <button class="quick-prompt-btn" onclick="sendQuickPrompt('Novel romantis yang seru')">
-                                    ❤️ Romantis
+                                    Romantis
                                 </button>
                                 <button class="quick-prompt-btn" onclick="sendQuickPrompt('Buku motivasi dan pengembangan diri')">
-                                    ⭐ Motivasi
+                                    Motivasi
                                 </button>
                                 <button class="quick-prompt-btn" onclick="sendQuickPrompt('Buku bisnis atau keuangan')">
-                                    💰 Bisnis
+                                    Bisnis
                                 </button>
                             </div>
 

@@ -452,7 +452,7 @@
                 </div>
                 <div class="chatbot-title">
                     <h3>Asisten Baleide</h3>
-                    <p>Cari buku impianmu 📚</p>
+                    <p>Cari buku impianmu</p>
                 </div>
             </div>
             <button class="chatbot-close" onclick="toggleChatbot()">
@@ -467,8 +467,8 @@
                     <i class="fas fa-robot"></i>
                 </div>
                 <div class="chatbot-message-bubble">
-                    <strong>Halo, Chief! 👋</strong><br>
-                    Saya <strong>Asisten Baleide</strong>, siap bantu kamu nemuin buku yang pas!<br><br>
+                    <strong>Halo, Chief!</strong><br>
+                    Saya <strong>Asisten Baleide</strong>, siap bantu kamu nemuin buku yang pas.<br><br>
                     <strong>Bingung mau baca buku apa?</strong> Cukup ceritain aja mood atau preferensi kamu, dan saya akan rekomendasikan buku terbaik untuk kamu!
                 </div>
             </div>
