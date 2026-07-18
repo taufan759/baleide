@@ -181,10 +181,10 @@
     
     .chatbot-message-bubble {
         max-width: 75%;
-        padding: 12px 16px;
+        padding: 14px 18px;
         border-radius: 18px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        line-height: 1.5;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        line-height: 1.7;
         font-size: 14px;
         word-wrap: break-word;
     }
@@ -193,7 +193,27 @@
         background: white;
         color: #333;
         border-bottom-left-radius: 4px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #e8e8e8;
+    }
+    
+    .chatbot-message.bot .chatbot-message-bubble p {
+        margin: 0 0 8px 0;
+        line-height: 1.8;
+    }
+    
+    .chatbot-message.bot .chatbot-message-bubble p:last-child {
+        margin-bottom: 0;
+    }
+    
+    .chatbot-message.bot .chatbot-message-bubble ul,
+    .chatbot-message.bot .chatbot-message-bubble ol {
+        margin: 8px 0;
+        padding-left: 18px;
+    }
+    
+    .chatbot-message.bot .chatbot-message-bubble li {
+        margin-bottom: 4px;
+        line-height: 1.6;
     }
     
     .chatbot-message.user .chatbot-message-bubble {
@@ -467,9 +487,9 @@
                     <i class="fas fa-robot"></i>
                 </div>
                 <div class="chatbot-message-bubble">
-                    <strong>Halo, Chief!</strong><br>
-                    Saya <strong>Asisten Baleide</strong>, siap bantu kamu nemuin buku yang pas.<br><br>
-                    <strong>Bingung mau baca buku apa?</strong> Cukup ceritain aja mood atau preferensi kamu, dan saya akan rekomendasikan buku terbaik untuk kamu!
+                    Halo, Chief!<br><br>
+                    Saya asisten Baleide, siap bantu kamu nemuin buku yang pas.<br><br>
+                    Bingung mau baca apa? Ceritain aja mood atau preferensi kamu, nanti saya bantu cariin buku terbaik untuk kamu.
                 </div>
             </div>
         </div>

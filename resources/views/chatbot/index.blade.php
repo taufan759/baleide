@@ -37,9 +37,11 @@
     }
     .message-bubble {
         max-width: 70%;
-        padding: 12px 18px;
+        padding: 15px 20px;
         border-radius: 18px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        line-height: 1.7;
+        font-size: 14px;
     }
     .message.user .message-bubble {
         background: #6366f1;
@@ -50,6 +52,22 @@
         background: white;
         color: #333;
         border-bottom-left-radius: 4px;
+    }
+    .message.ai .message-bubble p {
+        margin: 0 0 10px 0;
+        line-height: 1.8;
+    }
+    .message.ai .message-bubble p:last-child {
+        margin-bottom: 0;
+    }
+    .message.ai .message-bubble ul,
+    .message.ai .message-bubble ol {
+        margin: 8px 0;
+        padding-left: 20px;
+    }
+    .message.ai .message-bubble li {
+        margin-bottom: 4px;
+        line-height: 1.6;
     }
     .message-avatar {
         width: 40px;
@@ -226,12 +244,12 @@
                                     <i class="fas fa-robot"></i>
                                 </div>
                                 <div class="message-bubble">
-                                    <p class="mb-0">Hai! Saya <strong>Baleide Assistant</strong>, asisten AI yang siap membantu kamu menemukan e-book yang tepat.</p>
+                                    <p class="mb-0">Hai! Saya Baleide Assistant, asisten AI yang siap membantu kamu menemukan e-book yang tepat.</p>
                                     <p class="mb-0 mt-2">Ceritakan mood atau kebutuhan baca kamu hari ini. Misalnya:</p>
                                     <ul class="mb-0 mt-2">
-                                        <li>"Aku lagi butuh buku santai buat weekend"</li>
-                                        <li>"Pengen belajar tentang teknologi"</li>
-                                        <li>"Lagi mood baca novel romantis"</li>
+                                        <li>Aku lagi butuh buku santai buat weekend</li>
+                                        <li>Pengen belajar tentang teknologi</li>
+                                        <li>Lagi mood baca novel romantis</li>
                                     </ul>
                                 </div>
                             </div>
